@@ -6,6 +6,7 @@ import { FileText, Upload, CreditCard, Banknote } from 'lucide-react';
 import { Label } from './ui/label';
 import { Input } from './ui/input';
 import { toast } from 'sonner';
+import { getApiUrl } from '../config/api';
 
 export function Checkout() {
   const { cart, getTotal, clearCart } = useCart();
@@ -66,7 +67,7 @@ export function Checkout() {
       }
 
       // Enviar al backend
-      const response = await fetch('http://localhost:3000/api/compras', {
+      const response = await fetch(getApiUrl('/api/compras'), {
         method: 'POST',
         body: formDataToSend,
       });

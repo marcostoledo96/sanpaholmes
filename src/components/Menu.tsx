@@ -4,6 +4,7 @@ import { useCart } from '../context/CartContext';
 import { toast } from 'sonner';
 import { Coffee, UtensilsCrossed, Cookie, Sandwich, Beer, Pizza } from 'lucide-react';
 import { Product } from '../types';
+import { getApiUrl } from '../config/api';
 
 type CategoryFilter = 'all' | 'merienda' | 'cena';
 
@@ -17,7 +18,7 @@ export function Menu() {
   useEffect(() => {
     const fetchProducts = async () => {
       try {
-        const response = await fetch('http://localhost:3000/api/productos');
+        const response = await fetch(getApiUrl('/api/productos'));
         const data = await response.json();
         
         if (data.success && Array.isArray(data.productos)) {

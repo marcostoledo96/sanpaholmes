@@ -1,5 +1,6 @@
 import { createContext, useContext, useState, ReactNode } from 'react';
 import { VendorUser } from '../types';
+import { getApiUrl } from '../config/api';
 
 interface AuthContextType {
   user: VendorUser | null;
@@ -15,7 +16,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const login = async (username: string, password: string): Promise<boolean> => {
     try {
       // Llamar al backend de autenticación
-      const response = await fetch('http://localhost:3000/api/auth/login', {
+      const response = await fetch(getApiUrl('/api/auth/login'), {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

@@ -14,6 +14,7 @@ import { Input } from './ui/input';
 import { Label } from './ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from './ui/select';
 import { toast } from 'sonner';
+import { getApiUrl } from '../config/api';
 
 // Definimos los tipos de datos que vamos a manejar
 type Product = {
@@ -126,7 +127,7 @@ export function AdminPanelNew() {
     setLoading(true);
     try {
       // Hacemos la petición al servidor backend en el puerto 3000
-      const response = await fetch('http://localhost:3000/api/productos');
+      const response = await fetch(getApiUrl('/api/productos'));
       
       // Verificamos si la respuesta fue exitosa (código 200-299)
       if (!response.ok) {
@@ -165,7 +166,7 @@ export function AdminPanelNew() {
       
       // Hacemos la petición con el token en el header Authorization
       // Esto es necesario porque el endpoint de compras está protegido
-      const response = await fetch('http://localhost:3000/api/compras', {
+      const response = await fetch(getApiUrl('/api/compras'), {
         headers: {
           'Authorization': `Bearer ${token}`,
         },
@@ -231,7 +232,7 @@ export function AdminPanelNew() {
       console.log('Creando producto:', productData);
       
       // Hacemos una petición POST para crear el producto
-      const response = await fetch('http://localhost:3000/api/productos', {
+      const response = await fetch(getApiUrl('/api/productos'), {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -305,7 +306,7 @@ export function AdminPanelNew() {
       console.log('Actualizando producto:', editingProduct.id, productData);
       
       // Usamos PUT para actualizar un recurso existente
-      const response = await fetch(`http://localhost:3000/api/productos/${editingProduct.id}`, {
+      const response = await fetch(getApiUrl(`/api/productos/${editingProduct.id}`), {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
@@ -343,7 +344,7 @@ export function AdminPanelNew() {
       const token = localStorage.getItem('token');
       
       // DELETE se usa para eliminar recursos
-      const response = await fetch(`http://localhost:3000/api/productos/${id}`, {
+      const response = await fetch(getApiUrl(`/api/productos/${id}`), {
         method: 'DELETE',
         headers: {
           'Authorization': `Bearer ${token}`,
@@ -446,7 +447,7 @@ export function AdminPanelNew() {
   const handleToggleStatus = async (purchaseId: number, field: 'abonado' | 'entregado', currentValue: boolean) => {
     try {
       const token = localStorage.getItem('token');
-      const response = await fetch(`http://localhost:3000/api/compras/${purchaseId}/estado`, {
+      const response = await fetch(getApiUrl(`/api/compras/${purchaseId}/estado`), {
         method: 'PATCH',
         headers: {
           'Content-Type': 'application/json',
@@ -475,7 +476,7 @@ export function AdminPanelNew() {
 
     try {
       const token = localStorage.getItem('token');
-      const response = await fetch(`http://localhost:3000/api/compras/${purchaseId}`, {
+      const response = await fetch(getApiUrl(`/api/compras/${purchaseId}`), {
         method: 'DELETE',
         headers: {
           'Authorization': `Bearer ${token}`,
@@ -513,7 +514,7 @@ export function AdminPanelNew() {
 
     try {
       const token = localStorage.getItem('token');
-      const response = await fetch(`http://localhost:3000/api/compras/${editingPurchase.id}`, {
+      const response = await fetch(getApiUrl(`/api/compras/${editingPurchase.id}`), {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
@@ -580,7 +581,7 @@ export function AdminPanelNew() {
         subtotal: detalle.subtotal
       }));
 
-      const response = await fetch(`http://localhost:3000/api/compras/${editingPurchaseProducts}/productos`, {
+      const response = await fetch(getApiUrl(`/api/compras/${editingPurchaseProducts}/productos`), {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
@@ -964,7 +965,7 @@ export function AdminPanelNew() {
                       </div>
                       {purchase.comprobante_archivo && (
                         <a
-                          href={`http://localhost:3000${purchase.comprobante_archivo}`}
+                          href={getApiUrl(purchase.comprobante_archivo)}
                           target="_blank"
                           rel="noopener noreferrer"
                           className="flex items-center gap-2 text-blue-400 hover:text-blue-300 transition-colors"
