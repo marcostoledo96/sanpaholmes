@@ -44,8 +44,13 @@ Asegurate de que estos archivos estén correctos:
   "routes": [
     { "src": "/api/(.*)", "dest": "/server.js" },
     { "src": "/uploads/(.*)", "dest": "/server.js" },
-    { "src": "/(.*)", "dest": "/dist/$1" }
-  ]
+    { "src": "/assets/(.*)", "dest": "/dist/assets/$1" },
+    { "src": "/images/(.*)", "dest": "/dist/images/$1" },
+    { "src": "/(.*)", "dest": "/dist/index.html" }
+  ],
+  "env": {
+    "NODE_ENV": "production"
+  }
 }
 ```
 
@@ -234,6 +239,23 @@ vercel --prod
    ```
 2. Asegurate de que `server.js` esté en la raíz del proyecto
 3. Redeploy
+
+### ❌ Error: "404 NOT_FOUND" en rutas como /menu, /cart, etc.
+
+**Causa:** El routing de React Router no está configurado correctamente para SPA
+
+**Solución:**
+Ya está corregido en `vercel.json`. Todas las rutas del frontend ahora apuntan a `/dist/index.html` para que React Router maneje la navegación:
+```json
+{
+  "routes": [
+    { "src": "/api/(.*)", "dest": "/server.js" },
+    { "src": "/assets/(.*)", "dest": "/dist/assets/$1" },
+    { "src": "/images/(.*)", "dest": "/dist/images/$1" },
+    { "src": "/(.*)", "dest": "/dist/index.html" }
+  ]
+}
+```
 
 ### ❌ Las imágenes no se ven
 
