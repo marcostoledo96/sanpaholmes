@@ -1,0 +1,15 @@
+node_modules
+.env
+.env.local
+*.log
+npm-debug.log*
+.DS_Store
+.vscode
+.idea
+*.md
+!README.md
+db/migrations/*.sql
+img/
+GUIA_IMAGENES.md
+CAMPO_DETALLES_IMPLEMENTADO.md
+GOOGLE_SHEETS_SETUP.md

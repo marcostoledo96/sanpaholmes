@@ -1,9 +1,13 @@
-// Configuración para deploy en Vercel
-// Este archivo le dice a Vercel cómo manejar nuestro proyecto
-
 {
   "version": 2,
   "builds": [
+    {
+      "src": "package.json",
+      "use": "@vercel/static-build",
+      "config": {
+        "distDir": "dist"
+      }
+    },
     {
       "src": "server.js",
       "use": "@vercel/node"
@@ -16,15 +20,11 @@
     },
     {
       "src": "/uploads/(.*)",
-      "dest": "/public/uploads/$1"
-    },
-    {
-      "src": "/(.*\\.(js|jsx|ts|tsx|css|json|png|jpg|jpeg|gif|svg|ico))",
-      "dest": "/$1"
+      "dest": "/server.js"
     },
     {
       "src": "/(.*)",
-      "dest": "/public/index.html"
+      "dest": "/dist/$1"
     }
   ],
   "env": {
@@ -32,7 +32,8 @@
   },
   "functions": {
     "server.js": {
-      "maxDuration": 10
+      "maxDuration": 10,
+      "memory": 1024
     }
   }
 }
