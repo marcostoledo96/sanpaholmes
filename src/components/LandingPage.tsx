@@ -1,4 +1,4 @@
-import React from 'react';
+
 import { useNavigate } from 'react-router-dom';
 import { Search, ShoppingBag, Clock, Shield, Users } from 'lucide-react';
 import { PoliceButton } from './PoliceButton';

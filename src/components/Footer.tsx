@@ -1,5 +1,5 @@
-import React from 'react';
-import { Fingerprint, Users, Mail, MapPin } from 'lucide-react';
+
+import { Fingerprint, Users, MapPin } from 'lucide-react';
 
 export function Footer() {
   return (

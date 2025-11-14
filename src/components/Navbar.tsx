@@ -1,4 +1,4 @@
-import React from 'react';
+
 import { Search, ShoppingCart, UserCircle, LogOut } from 'lucide-react';
 import { useCart } from '../context/CartContext';
 import { useAuth } from '../context/AuthContext';

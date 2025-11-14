@@ -1,7 +1,6 @@
-import React from 'react';
+
 import { Product } from '../types';
 import { CategoryBadge } from './CategoryBadge';
-import { PoliceButton } from './PoliceButton';
 import { ShoppingCart } from 'lucide-react';
 import { ImageWithFallback } from './figma/ImageWithFallback';
 

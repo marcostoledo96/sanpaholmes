@@ -1,11 +1,10 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { useCart } from '../context/CartContext';
 import { useNavigate } from 'react-router-dom';
 import { PoliceButton } from './PoliceButton';
 import { FileText, Upload, CreditCard, Banknote } from 'lucide-react';
 import { Label } from './ui/label';
 import { Input } from './ui/input';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from './ui/select';
 import { toast } from 'sonner';
 
 export function Checkout() {
@@ -113,8 +112,6 @@ export function Checkout() {
     navigate('/cart');
     return null;
   }
-
-  const tables = Array.from({ length: 32 }, (_, i) => i + 1);
 
   return (
     <div className="min-h-screen py-20">

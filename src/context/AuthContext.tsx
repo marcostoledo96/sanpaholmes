@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useState, ReactNode } from 'react';
+import { createContext, useContext, useState, ReactNode } from 'react';
 import { VendorUser } from '../types';
 
 interface AuthContextType {
@@ -32,7 +32,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         // Guardar la información del usuario
         setUser({
           username: data.usuario.username,
-          role: data.usuario.roles.includes('admin') ? 'admin' : 'vendor',
+          role: (data.usuario.roles.includes('admin') ? 'admin' : 'vendor') as 'vendor',
         });
         
         return true;

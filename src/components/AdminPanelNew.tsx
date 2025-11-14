@@ -6,8 +6,8 @@ import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { PoliceButton } from './PoliceButton';
 import { 
-  Package, ShoppingBag, Eye, Edit2, Trash2, Plus, 
-  FileText, CheckCircle, Clock, CheckCheck, X, Save 
+  Package, ShoppingBag, Edit2, Trash2, Plus, 
+  FileText, CheckCircle, CheckCheck, X, Save 
 } from 'lucide-react';
 import { Badge } from './ui/badge';
 import { Input } from './ui/input';
@@ -414,16 +414,16 @@ export function AdminPanelNew() {
   };
 
   // Función auxiliar para formatear fechas
-  const formatDate = (dateString: string) => {
-    const date = new Date(dateString);
-    return date.toLocaleString('es-AR', {
-      day: '2-digit',
-      month: '2-digit',
-      year: 'numeric',
-      hour: '2-digit',
-      minute: '2-digit',
-    });
-  };
+  // const formatDate = (dateString: string) => {
+  //   const date = new Date(dateString);
+  //   return date.toLocaleString('es-AR', {
+  //     day: '2-digit',
+  //     month: '2-digit',
+  //     year: 'numeric',
+  //     hour: '2-digit',
+  //     minute: '2-digit',
+  //   });
+  // };
 
   // ========== FUNCIONES PARA MANEJO DE COMPRAS ==========
 
