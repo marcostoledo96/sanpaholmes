@@ -15,10 +15,12 @@ const pool = new Pool({
   ssl: {
     rejectUnauthorized: false // Necesario para conectarnos a Neon de forma segura
   },
-  // Configuración de timeouts y conexiones
-  connectionTimeoutMillis: 5000, // 5 segundos para conectarse
+  // Configuración de timeouts y conexiones - aumentados para móviles
+  connectionTimeoutMillis: 10000, // 10 segundos para conectarse (antes 5)
   idleTimeoutMillis: 30000, // 30 segundos antes de cerrar una conexión inactiva
   max: 20, // Máximo 20 conexiones simultáneas
+  query_timeout: 15000, // 15 segundos máximo para queries (nuevo)
+  statement_timeout: 15000, // 15 segundos máximo para statements (nuevo)
 });
 
 // Probamos la conexión al iniciar

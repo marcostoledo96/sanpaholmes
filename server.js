@@ -21,18 +21,42 @@ app.use(express.static(path.join(__dirname, 'public')));
 const productosRouter = require('./api/productos');
 const comprasRouter = require('./api/compras');
 const authRouter = require('./api/auth');
+const pool = require('./db/connection');
 
 app.use('/api/productos', productosRouter);
 app.use('/api/compras', comprasRouter);
 app.use('/api/auth', authRouter);
 
-// Ruta de prueba para verificar que el servidor funciona
-app.get('/api/health', (req, res) => {
-  res.json({
-    success: true,
-    mensaje: '✅ API funcionando correctamente',
-    timestamp: new Date().toISOString()
-  });
+// Ruta de prueba para verificar que el servidor y la BD funcionan
+app.get('/api/health', async (req, res) => {
+  try {
+    // Probamos la conexión a la base de datos
+    const result = await pool.query('SELECT NOW() as timestamp, version() as version');
+    
+    res.json({
+      success: true,
+      mensaje: '✅ API y Base de Datos funcionando correctamente',
+      timestamp: new Date().toISOString(),
+      database: {
+        connected: true,
+        timestamp: result.rows[0].timestamp,
+        version: result.rows[0].version.split(' ')[0] + ' ' + result.rows[0].version.split(' ')[1]
+      },
+      environment: process.env.NODE_ENV || 'development'
+    });
+  } catch (error) {
+    console.error('❌ Error en health check:', error);
+    res.status(503).json({
+      success: false,
+      mensaje: '❌ Error de conexión a la base de datos',
+      timestamp: new Date().toISOString(),
+      database: {
+        connected: false,
+        error: error.message
+      },
+      environment: process.env.NODE_ENV || 'development'
+    });
+  }
 });
 
 // Ruta para la raíz - sirve el frontend
