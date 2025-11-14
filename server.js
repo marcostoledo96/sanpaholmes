@@ -1,0 +1,75 @@
+// Servidor principal con Express
+// Acá está toda la configuración del servidor y las rutas de la API
+
+const express = require('express');
+const cors = require('cors');
+const path = require('path');
+require('dotenv').config();
+
+const app = express();
+
+// Middlewares globales
+app.use(cors()); // Permite peticiones desde otros dominios
+app.use(express.json()); // Para leer JSON en las peticiones
+app.use(express.urlencoded({ extended: true })); // Para leer formularios
+
+// Servimos los archivos estáticos (imágenes, CSS, JS)
+app.use('/uploads', express.static(path.join(__dirname, 'public/uploads')));
+app.use(express.static(path.join(__dirname, 'public')));
+
+// Rutas de la API
+const productosRouter = require('./api/productos');
+const comprasRouter = require('./api/compras');
+const authRouter = require('./api/auth');
+
+app.use('/api/productos', productosRouter);
+app.use('/api/compras', comprasRouter);
+app.use('/api/auth', authRouter);
+
+// Ruta de prueba para verificar que el servidor funciona
+app.get('/api/health', (req, res) => {
+  res.json({
+    success: true,
+    mensaje: '✅ API funcionando correctamente',
+    timestamp: new Date().toISOString()
+  });
+});
+
+// Ruta para la raíz - sirve el frontend
+app.get('/', (req, res) => {
+  res.sendFile(path.join(__dirname, 'index.html'));
+});
+
+// Manejo de rutas no encontradas
+app.use((req, res) => {
+  res.status(404).json({
+    success: false,
+    mensaje: 'Ruta no encontrada'
+  });
+});
+
+// Manejo de errores global
+app.use((err, req, res, next) => {
+  console.error('Error:', err);
+  res.status(500).json({
+    success: false,
+    mensaje: 'Error interno del servidor',
+    error: process.env.NODE_ENV === 'development' ? err.message : undefined
+  });
+});
+
+// Solo iniciamos el servidor si no estamos en Vercel
+// En Vercel, esto se maneja automáticamente
+if (process.env.NODE_ENV !== 'production') {
+  const PORT = process.env.PORT || 3000;
+  app.listen(PORT, () => {
+    console.log(`\n🚀 Servidor corriendo en http://localhost:${PORT}`);
+    console.log(`📋 API Health: http://localhost:${PORT}/api/health`);
+    console.log(`🛍️ API Productos: http://localhost:${PORT}/api/productos`);
+    console.log(`🛒 API Compras: http://localhost:${PORT}/api/compras`);
+    console.log(`🔐 API Auth: http://localhost:${PORT}/api/auth/login\n`);
+  });
+}
+
+// Exportamos la app para Vercel
+module.exports = app;
