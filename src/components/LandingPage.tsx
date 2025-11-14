@@ -112,12 +112,12 @@ export function LandingPage() {
             <div className="bg-gradient-to-br from-[#0f0f0f] to-[#1f1f1f] border-2 border-[#fbbf24]/50 rounded-xl sm:rounded-2xl p-4 sm:p-8 flex flex-col items-center justify-center hover:border-[#fbbf24] transition-all shadow-xl hover:scale-105 duration-300">
               <div className="w-24 h-24 sm:w-32 sm:h-32 md:w-40 md:h-40 flex items-center justify-center mb-3 sm:mb-4">
                 <img 
-                  src="/images/escudo-san-patricio.jpg" 
+                  src="/images/escudo-san-patricio.png" 
                   alt="Grupo Scout San Patricio"
                   className="w-full h-full object-contain rounded-lg"
                 />
               </div>
-              <p className="text-xs sm:text-sm text-center text-[#fbbf24] font-semibold">Escudo<br/>San Patricio</p>
+              <p className="text-xs sm:text-sm text-center text-[#fbbf24] font-semibold">Grupo Scout<br/>"San Patricio"</p>
             </div>
 
             {/* Escudo Tropa Raider */}

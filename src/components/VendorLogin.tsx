@@ -50,7 +50,7 @@ export function VendorLogin() {
         backgroundPosition: 'center',
       }}
     >
-      <div className="absolute inset-0 bg-black/95"></div>
+      <div className="absolute inset-0 bg-black"></div>
       
       <div className="relative z-10 w-full max-w-md mx-auto px-6">
         {/* Logo/Header */}
