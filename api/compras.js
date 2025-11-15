@@ -50,6 +50,10 @@ router.post('/', upload.single('comprobante'), async (req, res) => {
     console.log('productos type:', typeof productos);
     console.log('productos:', productos?.substring ? productos.substring(0, 100) : productos);
 
+    // Normalizar comprador_mesa: convertir string vacío a null
+    const mesaNormalizada = comprador_mesa && comprador_mesa !== '' ? parseInt(comprador_mesa) : null;
+    console.log('mesaNormalizada:', mesaNormalizada);
+
     // Validamos los datos obligatorios (mesa ya no es obligatoria)
     if (!comprador_nombre || !metodo_pago) {
       return res.status(400).json({
@@ -59,7 +63,7 @@ router.post('/', upload.single('comprobante'), async (req, res) => {
     }
 
     // Validamos que la mesa (si existe) esté entre 1 y 50
-    if (comprador_mesa && (comprador_mesa < 1 || comprador_mesa > 50)) {
+    if (mesaNormalizada && (mesaNormalizada < 1 || mesaNormalizada > 50)) {
       return res.status(400).json({
         success: false,
         mensaje: 'El número de mesa debe estar entre 1 y 50'
@@ -174,7 +178,7 @@ router.post('/', upload.single('comprobante'), async (req, res) => {
       `INSERT INTO compras (comprador_nombre, comprador_telefono, comprador_mesa, metodo_pago, comprobante_archivo, total, detalles_pedido)
        VALUES ($1, $2, $3, $4, $5, $6, $7)
        RETURNING *`,
-      [comprador_nombre, comprador_telefono || null, comprador_mesa, metodo_pago, comprobante_archivo, total, detalles_pedido || null]
+      [comprador_nombre, comprador_telefono || null, mesaNormalizada, metodo_pago, comprobante_archivo, total, detalles_pedido || null]
     );
     console.log('Compra insertada con ID:', compra.rows[0].id);
 
