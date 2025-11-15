@@ -1,18 +1,20 @@
 import { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { ProductCard } from './ProductCard';
 import { useCart } from '../context/CartContext';
 import { toast } from 'sonner';
-import { Coffee, UtensilsCrossed, Cookie, Sandwich, Beer, Pizza } from 'lucide-react';
+import { Coffee, UtensilsCrossed, Cookie, Sandwich, Beer, Pizza, ShoppingCart } from 'lucide-react';
 import { Product } from '../types';
 import { getApiUrl } from '../config/api';
 
 type CategoryFilter = 'all' | 'merienda' | 'cena';
 
 export function Menu() {
+  const navigate = useNavigate();
   const [categoryFilter, setCategoryFilter] = useState<CategoryFilter>('all');
   const [products, setProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
-  const { addToCart } = useCart();
+  const { addToCart, items } = useCart();
 
   // Cargar productos desde la API
   useEffect(() => {
@@ -251,6 +253,22 @@ export function Menu() {
             <p className="text-gray-400 text-lg">No se encontraron evidencias en esta categoría</p>
           </div>
         )}
+
+        {/* Botón de Carrito al final */}
+        <div className="flex justify-center py-16 sm:py-20">
+          <button
+            onClick={() => navigate('/cart')}
+            className="group relative px-8 sm:px-12 py-4 sm:py-5 bg-gradient-to-r from-[#fbbf24] to-[#f59e0b] text-black rounded-2xl font-bold text-lg sm:text-xl shadow-2xl hover:shadow-[#fbbf24]/50 transition-all duration-300 hover:scale-110 hover:from-[#fcd34d] hover:to-[#fbbf24] border-2 border-[#fbbf24] hover:border-[#fcd34d] animate-pulse hover:animate-none"
+          >
+            <div className="flex items-center gap-3 sm:gap-4">
+              <ShoppingCart className="w-6 h-6 sm:w-8 sm:h-8 group-hover:scale-110 transition-transform" />
+              <span>IR AL CARRITO</span>
+              <div className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full w-8 h-8 sm:w-10 sm:h-10 flex items-center justify-center text-sm sm:text-base font-bold shadow-lg border-2 border-white group-hover:scale-125 transition-transform">
+                {items.length}
+              </div>
+            </div>
+          </button>
+        </div>
       </div>
     </div>
   );
