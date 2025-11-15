@@ -127,6 +127,9 @@ async function crearTablas() {
       total DECIMAL(10, 2) NOT NULL,
       fecha TIMESTAMP DEFAULT NOW(),
       estado VARCHAR(20) DEFAULT 'pendiente',
+      abonado BOOLEAN DEFAULT false,
+      listo BOOLEAN DEFAULT false,
+      entregado BOOLEAN DEFAULT false,
       detalles_pedido TEXT,
       comprador_telefono VARCHAR(50)
     );

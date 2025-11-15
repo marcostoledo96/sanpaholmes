@@ -46,6 +46,7 @@ type Purchase = {
   comprobante_archivo: string | null;
   fecha: string;
   abonado: boolean;
+  listo: boolean;
   entregado: boolean;
   detalles_pedido: string | null;
   detalles: PurchaseDetail[];
@@ -500,8 +501,8 @@ export function AdminPanelNew() {
     }
   }, [searchQuery, purchases]);
 
-  // Actualizar estado de compra (abonado/entregado)
-  const handleToggleStatus = async (purchaseId: number, field: 'abonado' | 'entregado', currentValue: boolean) => {
+  // Actualizar estado de compra (abonado/listo/entregado)
+  const handleToggleStatus = async (purchaseId: number, field: 'abonado' | 'listo' | 'entregado', currentValue: boolean) => {
     try {
       const token = localStorage.getItem('token');
       const response = await fetch(getApiUrl(`/api/compras/${purchaseId}/estado`), {
@@ -549,8 +550,8 @@ export function AdminPanelNew() {
       telefono = '54' + telefono;
     }
 
-    // Crear mensaje personalizado
-    const mensaje = `¡Hola *${purchase.comprador_nombre}*! 🎉\n\nTu pedido del evento *SanpaHolmes* ya está listo para ser retirado. 🔍✨\n\n📦 *Pedido #${purchase.id}*\n${purchase.comprador_mesa ? `📍 *Mesa:* ${purchase.comprador_mesa}\n` : ''}💰 *Total:* $${purchase.total}\n\nPodés pasar a retirarlo cuando quieras. ¡Gracias por tu compra! 🍔☕`;
+    // Crear mensaje personalizado sin emojis
+    const mensaje = `Hola *${purchase.comprador_nombre}*!\n\nTu pedido del evento *SanpaHolmes* ya está listo para ser retirado.\n\n*Pedido #${purchase.id}*\n${purchase.comprador_mesa ? `*Mesa:* ${purchase.comprador_mesa}\n` : ''}*Total:* $${purchase.total}\n\nPodés pasar a retirarlo cuando quieras. Gracias por tu compra!`;
 
     // Crear URL de WhatsApp
     const whatsappUrl = `https://wa.me/${telefono}?text=${encodeURIComponent(mensaje)}`;
@@ -1015,8 +1016,11 @@ export function AdminPanelNew() {
                           <Badge className={purchase.abonado ? 'bg-green-600' : 'bg-gray-600'}>
                             {purchase.abonado ? '✓ Abonado' : 'Pendiente de pago'}
                           </Badge>
+                          <Badge className={purchase.listo ? 'bg-blue-600' : 'bg-gray-600'}>
+                            {purchase.listo ? '✓ Listo' : 'En preparación'}
+                          </Badge>
                           <Badge className={purchase.entregado ? 'bg-green-600' : 'bg-orange-600'}>
-                            {purchase.entregado ? '✓ Entregado' : 'Por entregar'}
+                            {purchase.entregado ? '✓✓ Entregado' : 'Por entregar'}
                           </Badge>
                         </div>
                       </div>
@@ -1098,6 +1102,28 @@ export function AdminPanelNew() {
                         {purchase.abonado ? 'Marcar como no abonado' : 'Marcar como abonado'}
                       </button>
                       <button
+                        onClick={() => handleToggleStatus(purchase.id, 'listo', purchase.listo)}
+                        className={`flex items-center gap-2 px-4 py-2 rounded-lg transition-colors ${
+                          purchase.listo 
+                            ? 'bg-blue-600/20 text-blue-400 hover:bg-blue-600/30' 
+                            : 'bg-gray-700 text-gray-300 hover:bg-gray-600'
+                        }`}
+                      >
+                        <CheckCircle className="w-4 h-4" />
+                        {purchase.listo ? 'Marcar como no listo' : 'Marcar como listo'}
+                      </button>
+                      {/* Botón de notificar por WhatsApp - solo si está listo y no entregado */}
+                      {purchase.comprador_telefono && purchase.listo && !purchase.entregado && (
+                        <button
+                          onClick={() => handleNotifyWhatsApp(purchase)}
+                          className="flex items-center gap-2 px-4 py-2 bg-green-600/20 text-green-400 rounded-lg hover:bg-green-600/30 transition-colors"
+                          title="Notificar que el pedido está listo"
+                        >
+                          <span className="material-icons text-base">whatsapp</span>
+                          Pedido Listo
+                        </button>
+                      )}
+                      <button
                         onClick={() => handleToggleStatus(purchase.id, 'entregado', purchase.entregado)}
                         className={`flex items-center gap-2 px-4 py-2 rounded-lg transition-colors ${
                           purchase.entregado 
@@ -1108,17 +1134,6 @@ export function AdminPanelNew() {
                         <CheckCheck className="w-4 h-4" />
                         {purchase.entregado ? 'Marcar como no entregado' : 'Marcar como entregado'}
                       </button>
-                      {/* Botón de notificar por WhatsApp */}
-                      {purchase.comprador_telefono && !purchase.entregado && (
-                        <button
-                          onClick={() => handleNotifyWhatsApp(purchase)}
-                          className="flex items-center gap-2 px-4 py-2 bg-green-600/20 text-green-400 rounded-lg hover:bg-green-600/30 transition-colors"
-                          title="Notificar que el pedido está listo"
-                        >
-                          <span className="material-icons text-base">whatsapp</span>
-                          Pedido Listo
-                        </button>
-                      )}
                       <button
                         onClick={() => handleEditPurchase(purchase)}
                         className="flex items-center gap-2 px-4 py-2 bg-blue-600/20 text-blue-400 rounded-lg hover:bg-blue-600/30 transition-colors"
