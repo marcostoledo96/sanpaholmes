@@ -1136,11 +1136,11 @@ export function AdminPanelNew() {
                             console.log('🔴 CLICK EN ENLACE WHATSAPP');
                             toast.success(`Abriendo WhatsApp para ${purchase.comprador_nombre}`);
                           }}
-                          className="flex items-center gap-2 px-4 py-2 bg-green-600/20 text-green-400 rounded-lg hover:bg-green-600/30 transition-colors no-underline"
+                          className="inline-flex items-center gap-2 px-3 py-2 bg-green-600/20 text-green-400 rounded-lg hover:bg-green-600/30 transition-colors no-underline whitespace-nowrap"
                           title="Notificar que el pedido está listo"
                         >
-                          <span className="material-icons text-base">whatsapp</span>
-                          <span>Notificar WhatsApp</span>
+                          <span className="material-icons text-base leading-none">whatsapp</span>
+                          <span className="text-sm sm:text-base">Notificar WhatsApp</span>
                         </a>
                       )}
                       
