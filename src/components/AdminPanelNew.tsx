@@ -5,6 +5,7 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { PoliceButton } from './PoliceButton';
+import imageCompression from 'browser-image-compression';
 import { 
   Package, ShoppingBag, Edit2, Trash2, Plus, 
   FileText, CheckCircle, CheckCheck, X, Save 
@@ -394,13 +395,13 @@ export function AdminPanelNew() {
     setImagenPreview('');
   };
 
-  // Manejador para cambio de archivo de imagen
-  const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  // Manejador para cambio de archivo de imagen con compresión de alta calidad
+  const handleImageChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
-      // Validar tamaño (máximo 5MB)
-      if (file.size > 5 * 1024 * 1024) {
-        toast.error('La imagen no puede superar los 5MB');
+      // Validar tamaño original (máximo 20MB antes de comprimir)
+      if (file.size > 20 * 1024 * 1024) {
+        toast.error('La imagen original no puede superar los 20MB');
         return;
       }
 
@@ -410,14 +411,39 @@ export function AdminPanelNew() {
         return;
       }
 
-      setImagenFile(file);
+      try {
+        // Mostrar indicador de procesamiento
+        toast.info('Procesando imagen de alta calidad...');
 
-      // Crear preview
-      const reader = new FileReader();
-      reader.onloadend = () => {
-        setImagenPreview(reader.result as string);
-      };
-      reader.readAsDataURL(file);
+        // Opciones de compresión para MÁXIMA CALIDAD
+        const options = {
+          maxSizeMB: 8,              // Tamaño máximo más generoso (8MB)
+          maxWidthOrHeight: 2400,     // Resolución alta (2400px)
+          useWebWorker: true,         // Usar worker para no bloquear UI
+          quality: 0.95,              // Calidad muy alta (95%)
+          alwaysKeepResolution: false, // Permitir reducción solo si es necesaria
+          fileType: 'image/jpeg'      // JPEG con alta calidad
+        };
+
+        // Comprimir imagen manteniendo alta calidad
+        const compressedFile = await imageCompression(file, options);
+        
+        console.log('📷 Imagen original:', (file.size / 1024 / 1024).toFixed(2), 'MB');
+        console.log('📷 Imagen optimizada:', (compressedFile.size / 1024 / 1024).toFixed(2), 'MB');
+        
+        setImagenFile(compressedFile);
+
+        // Crear preview de alta calidad
+        const reader = new FileReader();
+        reader.onloadend = () => {
+          setImagenPreview(reader.result as string);
+          toast.success('Imagen de alta calidad lista');
+        };
+        reader.readAsDataURL(compressedFile);
+      } catch (error) {
+        console.error('Error al procesar imagen:', error);
+        toast.error('Error al procesar la imagen');
+      }
     }
   };
 

@@ -28,7 +28,7 @@ const fileFilter = (req, file, cb) => {
 const upload = multer({
   storage: storage,
   fileFilter: fileFilter,
-  limits: { fileSize: 5 * 1024 * 1024 } // Máximo 5MB
+  limits: { fileSize: 10 * 1024 * 1024 } // Máximo 10MB para imágenes de alta calidad
 });
 
 // 📋 GET /api/productos - Listar todos los productos activos
