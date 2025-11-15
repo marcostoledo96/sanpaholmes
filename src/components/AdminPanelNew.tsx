@@ -1136,11 +1136,24 @@ export function AdminPanelNew() {
                             console.log('🔴 CLICK EN ENLACE WHATSAPP');
                             toast.success(`Abriendo WhatsApp para ${purchase.comprador_nombre}`);
                           }}
-                          className="inline-flex items-center gap-2 px-3 py-2 bg-green-600/20 text-green-400 rounded-lg hover:bg-green-600/30 transition-colors no-underline whitespace-nowrap"
+                          style={{
+                            display: 'inline-flex',
+                            alignItems: 'center',
+                            gap: '0.5rem',
+                            padding: '0.5rem 0.75rem',
+                            backgroundColor: 'rgba(22, 163, 74, 0.2)',
+                            color: 'rgb(74, 222, 128)',
+                            borderRadius: '0.5rem',
+                            textDecoration: 'none',
+                            whiteSpace: 'nowrap',
+                            transition: 'background-color 0.2s',
+                          }}
+                          onMouseEnter={(e) => e.currentTarget.style.backgroundColor = 'rgba(22, 163, 74, 0.3)'}
+                          onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'rgba(22, 163, 74, 0.2)'}
                           title="Notificar que el pedido está listo"
                         >
-                          <span className="material-icons text-base leading-none">whatsapp</span>
-                          <span className="text-sm sm:text-base">Notificar WhatsApp</span>
+                          <span className="material-icons" style={{ fontSize: '1rem', lineHeight: 1 }}>whatsapp</span>
+                          <span>Notificar WhatsApp</span>
                         </a>
                       )}
                       
