@@ -734,7 +734,7 @@ export function AdminPanelNew() {
   const exportToSheets = async (url: string): Promise<void> => {
     try {
       toast.info('Exportando ventas...', {
-        description: 'Enviando datos a Google Sheets'
+        description: 'Limpiando datos anteriores y enviando nuevos'
       });
 
       // Preparar datos para exportar
@@ -747,22 +747,27 @@ export function AdminPanelNew() {
         metodo_pago: purchase.metodo_pago,
         total: purchase.total,
         abonado: purchase.abonado ? 'Sí' : 'No',
+        listo: purchase.listo ? 'Sí' : 'No',
         entregado: purchase.entregado ? 'Sí' : 'No',
         detalles: purchase.detalles_pedido || 'Sin observaciones',
         productos: purchase.detalles.map(d => `${d.cantidad}x ${d.producto_nombre}`).join(', ')
       }));
 
+      // Enviar señal para limpiar y reemplazar datos
       await fetch(url, {
         method: 'POST',
         mode: 'no-cors', // Importante para Google Apps Script
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ ventas: dataToExport }),
+        body: JSON.stringify({ 
+          clearBefore: true, // Señal para limpiar datos anteriores
+          ventas: dataToExport 
+        }),
       });
 
       toast.success('Ventas exportadas correctamente', {
-        description: `${dataToExport.length} ventas enviadas a Google Sheets`
+        description: `${dataToExport.length} ventas enviadas a Google Sheets (datos anteriores eliminados)`
       });
 
     } catch (error) {
