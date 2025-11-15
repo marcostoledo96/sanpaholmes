@@ -14,7 +14,7 @@ export function Menu() {
   const [categoryFilter, setCategoryFilter] = useState<CategoryFilter>('all');
   const [products, setProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
-  const { addToCart, items } = useCart();
+  const { addToCart, cart } = useCart();
 
   // Cargar productos desde la API
   useEffect(() => {
@@ -264,7 +264,7 @@ export function Menu() {
               <ShoppingCart className="w-6 h-6 sm:w-8 sm:h-8 group-hover:scale-110 transition-transform" />
               <span>IR AL CARRITO</span>
               <div className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full w-8 h-8 sm:w-10 sm:h-10 flex items-center justify-center text-sm sm:text-base font-bold shadow-lg border-2 border-white group-hover:scale-125 transition-transform">
-                {items.length}
+                {cart.length}
               </div>
             </div>
           </button>
