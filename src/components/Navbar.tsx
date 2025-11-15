@@ -38,22 +38,22 @@ export function Navbar() {
           </div>
 
           {/* Navigation items */}
-          <div className="flex items-center gap-2 sm:gap-6 flex-shrink-0">
+          <div className="flex items-center gap-2 sm:gap-4 flex-shrink-0">
             {!isVendorPanel && (
               <>
                 <button
                   onClick={() => navigate('/menu')}
-                  className="text-gray-300 hover:text-[#fbbf24] transition-colors font-medium text-sm sm:text-base px-2 sm:px-0"
+                  className="bg-gradient-to-r from-[#fbbf24] to-[#f59e0b] text-black px-4 py-2 sm:px-6 sm:py-2.5 rounded-lg sm:rounded-xl font-bold text-sm sm:text-base hover:from-[#fcd34d] hover:to-[#fbbf24] transition-all shadow-lg hover:shadow-[#fbbf24]/50 hover:scale-105"
                 >
                   Menú
                 </button>
                 <button
                   onClick={() => navigate('/cart')}
-                  className="relative text-gray-300 hover:text-[#fbbf24] transition-colors group"
+                  className="relative bg-gradient-to-r from-[#ef4444] to-[#dc2626] text-white p-2.5 sm:p-3 rounded-lg sm:rounded-xl hover:from-[#f87171] hover:to-[#ef4444] transition-all shadow-lg hover:shadow-[#ef4444]/50 hover:scale-105 group"
                 >
                   <ShoppingCart className="w-5 h-5 sm:w-6 sm:h-6" />
                   {totalItems > 0 && (
-                    <span className="absolute -top-1 -right-1 sm:-top-2 sm:-right-2 bg-gradient-to-br from-[#ef4444] to-[#dc2626] text-white text-[0.625rem] sm:text-xs rounded-full w-4 h-4 sm:w-5 sm:h-5 flex items-center justify-center shadow-lg group-hover:scale-110 transition-transform">
+                    <span className="absolute -top-1 -right-1 sm:-top-2 sm:-right-2 bg-white text-[#ef4444] text-[0.625rem] sm:text-xs rounded-full w-5 h-5 sm:w-6 sm:h-6 flex items-center justify-center shadow-lg font-bold border-2 border-[#ef4444] group-hover:scale-110 transition-transform">
                       {totalItems}
                     </span>
                   )}

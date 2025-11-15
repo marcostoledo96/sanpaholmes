@@ -56,7 +56,7 @@ type TabType = 'products' | 'sales';
 
 export function AdminPanelNew() {
   // Hook para verificar autenticación y obtener datos del usuario
-  const { user } = useAuth();
+  const { user, loading: authLoading } = useAuth();
   const navigate = useNavigate();
   
   // Estados para manejar los datos
@@ -103,6 +103,18 @@ export function AdminPanelNew() {
     imagen_url: '',
     activo: true,
   });
+
+  // Mostrar loading mientras se verifica la sesión
+  if (authLoading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-black">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-16 w-16 border-t-4 border-[#fbbf24] border-solid mx-auto mb-4"></div>
+          <p className="text-gray-400">Verificando sesión...</p>
+        </div>
+      </div>
+    );
+  }
 
   // Si el usuario no está autenticado, redirigir al login
   if (!user) {

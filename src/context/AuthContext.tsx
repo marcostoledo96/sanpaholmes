@@ -4,6 +4,7 @@ import { getApiUrl } from '../config/api';
 
 interface AuthContextType {
   user: VendorUser | null;
+  loading: boolean;
   login: (username: string, password: string) => Promise<boolean>;
   logout: () => void;
 }
@@ -12,6 +13,7 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<VendorUser | null>(null);
+  const [loading, setLoading] = useState(true);
 
   // Restaurar sesión al cargar
   useEffect(() => {
@@ -27,6 +29,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         localStorage.removeItem('user');
       }
     }
+    
+    setLoading(false);
   }, []);
 
   const login = async (username: string, password: string): Promise<boolean> => {
@@ -73,7 +77,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   };
 
   return (
-    <AuthContext.Provider value={{ user, login, logout }}>
+    <AuthContext.Provider value={{ user, loading, login, logout }}>
       {children}
     </AuthContext.Provider>
   );

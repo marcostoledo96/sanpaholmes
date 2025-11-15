@@ -42,15 +42,7 @@ export function VendorLogin() {
   };
 
   return (
-    <div 
-      className="min-h-screen flex items-center justify-center py-16"
-      style={{
-        backgroundImage: 'url(https://images.unsplash.com/photo-1590978935631-65884b20570c?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxjcmltZSUyMHNjZW5lJTIwdGFwZSUyMHllbGxvd3xlbnwxfHx8fDE3NjMwOTA5Nzh8MA&ixlib=rb-4.1.0&q=80&w=1080)',
-        backgroundSize: 'cover',
-        backgroundPosition: 'center',
-      }}
-    >
-      <div className="absolute inset-0 bg-black"></div>
+    <div className="min-h-screen flex items-center justify-center py-16 bg-black">
       
       <div className="relative z-10 w-full max-w-md mx-auto px-6">
         {/* Logo/Header */}

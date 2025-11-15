@@ -59,6 +59,11 @@ export function Menu() {
     addToCart(product);
     toast.success(`${product.name} agregado al carrito`, {
       description: 'Evidencia registrada correctamente',
+      duration: 5000,
+      action: {
+        label: 'Ir al carrito',
+        onClick: () => navigate('/cart'),
+      },
     });
   };
 
