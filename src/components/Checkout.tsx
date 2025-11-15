@@ -25,9 +25,9 @@ export function Checkout() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    if (!formData.fullName || !formData.tableNumber || !formData.paymentMethod) {
+    if (!formData.fullName || !formData.paymentMethod) {
       toast.error('Por favor completá todos los campos obligatorios', {
-        description: 'Nombre completo, mesa y método de pago son requeridos',
+        description: 'Nombre completo y método de pago son requeridos',
       });
       return;
     }
@@ -190,19 +190,17 @@ export function Checkout() {
 
                   <div>
                     <Label htmlFor="tableNumber" className="text-gray-300 mb-2 block">
-                      Número de Mesa <span className="text-red-500">*</span>
-                      <span className="text-gray-500 text-sm ml-2">(que aparece en su cartel)</span>
+                      Número de Mesa <span className="text-gray-500">(Que aparece en su cartel. Si no tiene mesa, deje vacío)</span>
                     </Label>
                     <Input
                       id="tableNumber"
                       type="number"
                       min="1"
-                      max="32"
+                      max="50"
                       value={formData.tableNumber}
                       onChange={(e) => setFormData({ ...formData, tableNumber: e.target.value })}
                       className="bg-black/50 border-[#fbbf24]/30 text-white"
                       placeholder="Ej: 1, 2, 3..."
-                      required
                     />
                   </div>
 

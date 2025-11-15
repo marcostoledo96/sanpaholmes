@@ -61,7 +61,6 @@ export function Cart() {
                   <div className="flex justify-between items-start mb-3 gap-2">
                     <div className="min-w-0 flex-1">
                       <h3 className="text-white mb-1 text-base sm:text-xl truncate">{item.product.name}</h3>
-                      <p className="text-xs sm:text-sm text-gray-400 bg-black/30 px-2 sm:px-3 py-1 rounded-lg inline-block">#{item.product.id}</p>
                     </div>
                     <button
                       onClick={() => removeFromCart(item.product.id)}

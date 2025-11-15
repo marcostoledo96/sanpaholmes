@@ -29,7 +29,7 @@ export function LandingPage() {
               className="w-12 h-12 sm:w-16 sm:h-16 md:w-20 md:h-20 object-contain animate-pulse hidden sm:block"
             />
             
-            <div className="p-3 sm:p-4 bg-gradient-to-br from-[#fbbf24] to-[#f59e0b] rounded-xl sm:rounded-2xl shadow-2xl shadow-[#fbbf24]/50 hover:scale-110 transition-transform duration-300">
+            <div className="p-3 sm:p-4 bg-gradient-to-br from-[#fbbf24] to-[#f59e0b] rounded-xl sm:rounded-2xl shadow-2xl shadow-[#fbbf24]/50 hover:scale-110 transition-transform duration-300 mb-6 max-[425px]:mb-8">
               <Search className="w-10 h-10 sm:w-16 sm:h-16 text-black" />
             </div>
             
@@ -62,7 +62,7 @@ export function LandingPage() {
             Navegá por nuestro menú de evidencias y realizá tu pedido de forma rápida y sencilla.
           </p>
 
-          <div className="flex justify-center animate-in fade-in slide-in-from-bottom-4 duration-700 delay-700">
+          <div className="flex justify-center animate-in fade-in slide-in-from-bottom-4 duration-700 delay-700 mt-6 max-[425px]:mt-10">
             <PoliceButton
               variant="primary"
               icon={ShoppingBag}
