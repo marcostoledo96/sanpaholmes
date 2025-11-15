@@ -97,8 +97,8 @@ export function AdminPanelNew() {
   const [showComprobanteModal, setShowComprobanteModal] = useState(false);
   const [currentComprobante, setCurrentComprobante] = useState<string | null>(null);
   
-  // Estado para Google Sheets URL
-  const [googleSheetsUrl, setGoogleSheetsUrl] = useState<string>('');
+  // Estado para Google Sheets URL (preconfigurada)
+  const [googleSheetsUrl] = useState<string>('https://script.google.com/macros/s/AKfycby8KI4RHkz2kHSrFN13XsNLVB6fcftqppXG576AOjHltdKZTIJKzwKDIpH8S-SZEjrnYg/exec');
   
   // Estados para el formulario de producto (crear/editar)
   const [showProductForm, setShowProductForm] = useState(false);
@@ -669,15 +669,7 @@ export function AdminPanelNew() {
 
   // Exportar ventas a Google Sheets
   const handleExportToGoogleSheets = async () => {
-    if (!googleSheetsUrl) {
-      const url = prompt('Ingresa la URL del Google Apps Script (Web App):\n\nEjemplo: https://script.google.com/macros/s/YOUR_SCRIPT_ID/exec');
-      if (url) {
-        setGoogleSheetsUrl(url);
-        await exportToSheets(url);
-      }
-    } else {
-      await exportToSheets(googleSheetsUrl);
-    }
+    await exportToSheets(googleSheetsUrl);
   };
 
   const exportToSheets = async (url: string): Promise<void> => {
