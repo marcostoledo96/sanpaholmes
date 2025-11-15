@@ -749,7 +749,7 @@ export function AdminPanelNew() {
         abonado: purchase.abonado ? 'Sí' : 'No',
         listo: purchase.listo ? 'Sí' : 'No',
         entregado: purchase.entregado ? 'Sí' : 'No',
-        detalles: purchase.detalles_pedido || 'Sin observaciones',
+        detalles: purchase.detalles_pedido || '',
         productos: purchase.detalles.map(d => `${d.cantidad}x ${d.producto_nombre}`).join(', ')
       }));
 
