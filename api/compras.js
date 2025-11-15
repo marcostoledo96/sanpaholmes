@@ -458,11 +458,11 @@ router.get('/estadisticas/ventas', verificarAutenticacion, verificarPermiso('ver
   }
 });
 
-// 🔄 PATCH /api/compras/:id/estado - Actualizar estado de una compra (abonado/entregado)
+// 🔄 PATCH /api/compras/:id/estado - Actualizar estado de una compra (abonado/listo/entregado)
 router.patch('/:id/estado', verificarAutenticacion, verificarPermiso('editar_compras'), async (req, res) => {
   try {
     const { id } = req.params;
-    const { abonado, entregado } = req.body;
+    const { abonado, listo, entregado } = req.body;
 
     // Construir la consulta dinámicamente según los campos que se envíen
     const updates = [];
@@ -475,6 +475,12 @@ router.patch('/:id/estado', verificarAutenticacion, verificarPermiso('editar_com
       paramCount++;
     }
 
+    if (typeof listo === 'boolean') {
+      updates.push(`listo = $${paramCount}`);
+      values.push(listo);
+      paramCount++;
+    }
+
     if (typeof entregado === 'boolean') {
       updates.push(`entregado = $${paramCount}`);
       values.push(entregado);
@@ -484,7 +490,7 @@ router.patch('/:id/estado', verificarAutenticacion, verificarPermiso('editar_com
     if (updates.length === 0) {
       return res.status(400).json({
         success: false,
-        mensaje: 'Debe proporcionar al menos un campo a actualizar (abonado o entregado)'
+        mensaje: 'Debe proporcionar al menos un campo a actualizar (abonado, listo o entregado)'
       });
     }
 
