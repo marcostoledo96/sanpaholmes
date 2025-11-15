@@ -8,17 +8,9 @@ const multer = require('multer');
 const path = require('path');
 const { verificarAutenticacion, verificarPermiso } = require('../middleware/auth');
 
-// Configuración de multer para subir imágenes de productos
-const storage = multer.diskStorage({
-  destination: function (req, file, cb) {
-    cb(null, 'public/uploads/productos/'); // Carpeta específica para productos
-  },
-  filename: function (req, file, cb) {
-    // Generamos un nombre único para la imagen
-    const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
-    cb(null, 'producto-' + uniqueSuffix + path.extname(file.originalname));
-  }
-});
+// Configuración de multer para Vercel (usa memoria en vez de disco)
+// En Vercel serverless, el sistema de archivos es efímero, así que guardamos en memoria
+const storage = multer.memoryStorage();
 
 // Filtro para aceptar solo imágenes
 const fileFilter = (req, file, cb) => {
@@ -122,8 +114,13 @@ router.post('/', verificarAutenticacion, verificarPermiso('gestionar_productos')
       });
     }
 
-    // Si se subió una imagen, guardamos la ruta
-    const imagen_url = req.file ? `/uploads/productos/${req.file.filename}` : null;
+    // Si se subió una imagen, la convertimos a Base64 Data URL
+    let imagen_url = null;
+    if (req.file) {
+      const base64Image = req.file.buffer.toString('base64');
+      const mimeType = req.file.mimetype;
+      imagen_url = `data:${mimeType};base64,${base64Image}`;
+    }
 
     // Insertamos el producto
     const result = await pool.query(
@@ -141,9 +138,11 @@ router.post('/', verificarAutenticacion, verificarPermiso('gestionar_productos')
 
   } catch (error) {
     console.error('Error al crear producto:', error);
+    console.error('Stack trace:', error.stack);
     res.status(500).json({
       success: false,
-      mensaje: 'Error al crear el producto'
+      mensaje: 'Error al crear el producto',
+      error: process.env.NODE_ENV === 'development' ? error.message : undefined
     });
   }
 });
@@ -154,6 +153,8 @@ router.put('/:id', verificarAutenticacion, verificarPermiso('gestionar_productos
   try {
     const { id } = req.params;
     const { nombre, categoria, subcategoria, precio, stock, descripcion, activo } = req.body;
+
+    console.log('PUT /api/productos/:id - Datos recibidos:', { id, nombre, categoria, file: req.file ? 'SÍ' : 'NO' });
 
     // Verificamos que el producto existe
     const productoExiste = await pool.query(
@@ -168,10 +169,14 @@ router.put('/:id', verificarAutenticacion, verificarPermiso('gestionar_productos
       });
     }
 
-    // Si se subió una nueva imagen, usamos esa ruta, sino mantenemos la anterior
-    const imagen_url = req.file 
-      ? `/uploads/productos/${req.file.filename}` 
-      : productoExiste.rows[0].imagen_url;
+    // Si se subió una nueva imagen, la convertimos a Base64, sino mantenemos la anterior
+    let imagen_url = productoExiste.rows[0].imagen_url;
+    if (req.file) {
+      const base64Image = req.file.buffer.toString('base64');
+      const mimeType = req.file.mimetype;
+      imagen_url = `data:${mimeType};base64,${base64Image}`;
+      console.log('Nueva imagen procesada, tamaño:', req.file.size, 'bytes');
+    }
 
     // Actualizamos el producto
     const result = await pool.query(
@@ -197,9 +202,11 @@ router.put('/:id', verificarAutenticacion, verificarPermiso('gestionar_productos
 
   } catch (error) {
     console.error('Error al actualizar producto:', error);
+    console.error('Stack trace:', error.stack);
     res.status(500).json({
       success: false,
-      mensaje: 'Error al actualizar el producto'
+      mensaje: 'Error al actualizar el producto',
+      error: process.env.NODE_ENV === 'development' ? error.message : undefined
     });
   }
 });
