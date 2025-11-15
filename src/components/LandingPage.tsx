@@ -21,7 +21,7 @@ export function LandingPage() {
         
         <div className="relative z-10 text-center px-3 sm:px-6 max-w-5xl mx-auto w-full">
           {/* Logo con imágenes de trébol */}
-          <div className="flex flex-col sm:flex-row items-center justify-center gap-3 sm:gap-5 mb-6 sm:mb-8 animate-in fade-in duration-700">
+          <div className="flex flex-col sm:flex-row items-center justify-center gap-3 sm:gap-5 mb-6 sm:mb-8 mt-8 max-[425px]:mt-16 animate-in fade-in duration-700">
             {/* Trébol izquierdo */}
             <img 
               src="/images/trebol.png" 
@@ -62,7 +62,7 @@ export function LandingPage() {
             Navegá por nuestro menú de evidencias y realizá tu pedido de forma rápida y sencilla.
           </p>
 
-          <div className="flex justify-center animate-in fade-in slide-in-from-bottom-4 duration-700 delay-700 mt-6 max-[425px]:mt-10">
+          <div className="flex justify-center animate-in fade-in slide-in-from-bottom-4 duration-700 delay-700 mt-6 mb-8 max-[425px]:mb-16">
             <PoliceButton
               variant="primary"
               icon={ShoppingBag}

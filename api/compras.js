@@ -50,19 +50,19 @@ router.post('/', upload.single('comprobante'), async (req, res) => {
     console.log('productos type:', typeof productos);
     console.log('productos:', productos?.substring ? productos.substring(0, 100) : productos);
 
-    // Validamos los datos obligatorios
-    if (!comprador_nombre || !comprador_mesa || !metodo_pago) {
+    // Validamos los datos obligatorios (mesa ya no es obligatoria)
+    if (!comprador_nombre || !metodo_pago) {
       return res.status(400).json({
         success: false,
-        mensaje: 'Faltan datos obligatorios: comprador_nombre, comprador_mesa y metodo_pago'
+        mensaje: 'Faltan datos obligatorios: comprador_nombre y metodo_pago'
       });
     }
 
-    // Validamos que la mesa esté entre 1 y 32
-    if (comprador_mesa < 1 || comprador_mesa > 32) {
+    // Validamos que la mesa (si existe) esté entre 1 y 50
+    if (comprador_mesa && (comprador_mesa < 1 || comprador_mesa > 50)) {
       return res.status(400).json({
         success: false,
-        mensaje: 'El número de mesa debe estar entre 1 y 32'
+        mensaje: 'El número de mesa debe estar entre 1 y 50'
       });
     }
 

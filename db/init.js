@@ -121,12 +121,14 @@ async function crearTablas() {
     CREATE TABLE IF NOT EXISTS compras (
       id SERIAL PRIMARY KEY,
       comprador_nombre VARCHAR(200) NOT NULL,
-      comprador_mesa INTEGER NOT NULL CHECK (comprador_mesa BETWEEN 1 AND 32),
+      comprador_mesa INTEGER CHECK (comprador_mesa IS NULL OR (comprador_mesa BETWEEN 1 AND 50)),
       metodo_pago VARCHAR(20) NOT NULL CHECK (metodo_pago IN ('efectivo', 'transferencia')),
-      comprobante_archivo VARCHAR(500),
+      comprobante_archivo TEXT,
       total DECIMAL(10, 2) NOT NULL,
       fecha TIMESTAMP DEFAULT NOW(),
-      estado VARCHAR(20) DEFAULT 'pendiente'
+      estado VARCHAR(20) DEFAULT 'pendiente',
+      detalles_pedido TEXT,
+      comprador_telefono VARCHAR(50)
     );
   `);
   console.log('  ✓ Tabla compras');
