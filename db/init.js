@@ -30,7 +30,7 @@ async function inicializarBaseDeDatos() {
     await cargarProductos();
 
     console.log('\n✅ ¡Base de datos inicializada correctamente!');
-    console.log('Usuario admin creado: admin / admin123\n');
+    console.log('Usuario admin creado: admin / SanpaHolmes2025\n');
 
   } catch (error) {
     console.error('❌ Error al inicializar la base de datos:', error);
@@ -234,7 +234,7 @@ async function crearUsuarioAdmin() {
   console.log('🔑 Creando usuario administrador...');
 
   // Encriptamos la contraseña
-  const passwordHash = await bcrypt.hash('admin123', 10);
+  const passwordHash = await bcrypt.hash('SanpaHolmes2025', 10);
 
   // Creamos el usuario
   const result = await pool.query(
@@ -249,7 +249,7 @@ async function crearUsuarioAdmin() {
     [result.rows[0].id, adminRole.rows[0].id]
   );
 
-  console.log('  ✓ Usuario: admin / admin123');
+  console.log('  ✓ Usuario: admin / SanpaHolmes2025');
   console.log('');
 }
 
