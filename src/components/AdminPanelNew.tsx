@@ -100,7 +100,7 @@ export function AdminPanelNew() {
   const [currentComprobante, setCurrentComprobante] = useState<string | null>(null);
   
   // Estado para Google Sheets URL (preconfigurada)
-  const [googleSheetsUrl] = useState<string>('https://script.google.com/macros/s/AKfycby8KI4RHkz2kHSrFN13XsNLVB6fcftqppXG576AOjHltdKZTIJKzwKDIpH8S-SZEjrnYg/exec');
+  const [googleSheetsUrl] = useState<string>('https://script.google.com/macros/s/AKfycbwzUiED1XET22wFwD8gGeTmLxOSZVB2qJXJfAmkEDMuM9brfsnd20HplAFp-ODaMQc/exec');
   
   // Estados para el formulario de producto (crear/editar)
   const [showProductForm, setShowProductForm] = useState(false);

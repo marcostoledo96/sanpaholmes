@@ -28,14 +28,13 @@ function doPost(e) {
     // ===== LIMPIEZA DE DATOS ANTERIORES =====
     if (clearBefore) {
       const lastRow = sheet.getLastRow();
+      const lastCol = sheet.getLastColumn();
       
-      // Si hay más de 1 fila (la de encabezados), borrar todo el contenido
-      if (lastRow > 1) {
-        // Borrar desde fila 2 hasta la última
-        sheet.deleteRows(2, lastRow - 1);
-        Logger.log('Datos anteriores eliminados. Filas eliminadas: ' + (lastRow - 1));
-      } else {
-        Logger.log('No había datos anteriores para eliminar');
+      // Si hay datos, limpiar TODO (incluso encabezados)
+      if (lastRow > 0) {
+        // Limpiar todo el contenido
+        sheet.clear();
+        Logger.log('HOJA LIMPIADA COMPLETAMENTE');
       }
     }
     
