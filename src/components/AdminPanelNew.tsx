@@ -142,7 +142,14 @@ export function AdminPanelNew() {
       // El API retorna { success: true, productos: [...] }
       // Actualizamos el estado con los productos obtenidos
       if (data.success && Array.isArray(data.productos)) {
-        setProducts(data.productos);
+        // Mapear productos para mantener categoria y subcategoria separados
+        const productosConFormato = data.productos.map((p: any) => ({
+          ...p,
+          // Mantener categoria y subcategoria como campos separados
+          categoria: p.categoria,
+          subcategoria: p.subcategoria
+        }));
+        setProducts(productosConFormato);
       } else {
         // Si no viene en el formato esperado, intentar usar data directamente
         setProducts(Array.isArray(data) ? data : []);
@@ -419,15 +426,23 @@ export function AdminPanelNew() {
     const prod = product as any;
     setEditingProduct(product);
     
-    // Extraer categoria y subcategoria del formato "merienda-bebidas"
+    // Los productos ahora vienen con categoria y subcategoria ya separados de la API
+    // Pero si vienen en formato antiguo "merienda-bebidas", los separamos
     let categoria = 'merienda';
     let subcategoria = '';
     
     if (prod.categoria) {
-      const parts = prod.categoria.split('-');
-      if (parts.length === 2) {
-        categoria = parts[0]; // "merienda" o "cena"
-        subcategoria = parts[1]; // "bebidas", "dulces", etc.
+      // Si ya viene separado (formato nuevo de la API)
+      if (!prod.categoria.includes('-')) {
+        categoria = prod.categoria;
+        subcategoria = prod.subcategoria || '';
+      } else {
+        // Formato antiguo "merienda-bebidas" (compatibilidad)
+        const parts = prod.categoria.split('-');
+        if (parts.length === 2) {
+          categoria = parts[0];
+          subcategoria = parts[1];
+        }
       }
     }
     

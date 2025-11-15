@@ -23,16 +23,23 @@ export function Menu() {
         
         if (data.success && Array.isArray(data.productos)) {
           // Convertir los productos del backend al formato del frontend
-          const mappedProducts = data.productos.map((p: any) => ({
-            id: p.id.toString(),
-            name: p.nombre,
-            price: parseFloat(p.precio),
-            category: p.categoria,
-            image: p.imagen_url || 'https://via.placeholder.com/400x300?text=Sin+Imagen',
-            description: p.descripcion || '',
-            stock: p.stock,
-            activo: p.activo
-          }));
+          const mappedProducts = data.productos.map((p: any) => {
+            // Concatenar categoria y subcategoria para el formato esperado: "merienda-bebidas"
+            const categoryFormatted = p.subcategoria 
+              ? `${p.categoria}-${p.subcategoria}` 
+              : p.categoria;
+            
+            return {
+              id: p.id.toString(),
+              name: p.nombre,
+              price: parseFloat(p.precio),
+              category: categoryFormatted,
+              image: p.imagen_url || 'https://via.placeholder.com/400x300?text=Sin+Imagen',
+              description: p.descripcion || '',
+              stock: p.stock,
+              activo: p.activo
+            };
+          });
           setProducts(mappedProducts);
         }
       } catch (error) {

@@ -55,6 +55,16 @@ router.get('/', async (req, res) => {
 
     const result = await pool.query(query, params);
 
+    console.log(`📋 GET /api/productos - Devolviendo ${result.rows.length} productos`);
+    if (result.rows.length > 0) {
+      console.log('Ejemplo primer producto:', {
+        id: result.rows[0].id,
+        nombre: result.rows[0].nombre,
+        categoria: result.rows[0].categoria,
+        subcategoria: result.rows[0].subcategoria
+      });
+    }
+
     res.json({
       success: true,
       productos: result.rows
@@ -106,6 +116,15 @@ router.post('/', verificarAutenticacion, verificarPermiso('gestionar_productos')
   try {
     const { nombre, categoria, subcategoria, precio, stock, descripcion, activo } = req.body;
 
+    // Logging para debug de categoria/subcategoria
+    console.log('POST /api/productos - Datos recibidos:', {
+      nombre,
+      categoria,
+      subcategoria,
+      precio,
+      hasFile: !!req.file
+    });
+
     // Validamos que los campos obligatorios estén presentes
     if (!nombre || !categoria || !precio) {
       return res.status(400).json({
@@ -129,6 +148,8 @@ router.post('/', verificarAutenticacion, verificarPermiso('gestionar_productos')
        RETURNING *`,
       [nombre, categoria, subcategoria || null, precio, stock || 0, descripcion || null, imagen_url, activo !== undefined ? activo : true]
     );
+
+    console.log('✅ Producto creado con ID:', result.rows[0].id, '| Categoria:', result.rows[0].categoria, '| Subcategoria:', result.rows[0].subcategoria);
 
     res.status(201).json({
       success: true,
@@ -154,7 +175,14 @@ router.put('/:id', verificarAutenticacion, verificarPermiso('gestionar_productos
     const { id } = req.params;
     const { nombre, categoria, subcategoria, precio, stock, descripcion, activo } = req.body;
 
-    console.log('PUT /api/productos/:id - Datos recibidos:', { id, nombre, categoria, file: req.file ? 'SÍ' : 'NO' });
+    console.log('PUT /api/productos/:id - Datos recibidos:', { 
+      id, 
+      nombre, 
+      categoria, 
+      subcategoria, 
+      precio,
+      file: req.file ? 'SÍ' : 'NO' 
+    });
 
     // Verificamos que el producto existe
     const productoExiste = await pool.query(
@@ -193,6 +221,8 @@ router.put('/:id', verificarAutenticacion, verificarPermiso('gestionar_productos
        RETURNING *`,
       [nombre, categoria, subcategoria, precio, stock, descripcion, imagen_url, activo, id]
     );
+
+    console.log('✅ Producto actualizado ID:', id, '| Categoria:', result.rows[0].categoria, '| Subcategoria:', result.rows[0].subcategoria);
 
     res.json({
       success: true,
