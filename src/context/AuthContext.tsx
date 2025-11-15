@@ -1,4 +1,4 @@
-import { createContext, useContext, useState, ReactNode } from 'react';
+import { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 import { VendorUser } from '../types';
 import { getApiUrl } from '../config/api';
 
@@ -12,6 +12,22 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<VendorUser | null>(null);
+
+  // Restaurar sesión al cargar
+  useEffect(() => {
+    const token = localStorage.getItem('token');
+    const savedUser = localStorage.getItem('user');
+    
+    if (token && savedUser) {
+      try {
+        setUser(JSON.parse(savedUser));
+      } catch (error) {
+        console.error('Error al restaurar sesión:', error);
+        localStorage.removeItem('token');
+        localStorage.removeItem('user');
+      }
+    }
+  }, []);
 
   const login = async (username: string, password: string): Promise<boolean> => {
     try {
@@ -31,10 +47,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         localStorage.setItem('token', data.token);
         
         // Guardar la información del usuario
-        setUser({
+        const userData = {
           username: data.usuario.username,
           role: (data.usuario.roles.includes('admin') ? 'admin' : 'vendor') as 'vendor',
-        });
+        };
+        
+        setUser(userData);
+        localStorage.setItem('user', JSON.stringify(userData));
         
         return true;
       }
@@ -49,6 +68,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const logout = () => {
     // Limpiar el token y el usuario
     localStorage.removeItem('token');
+    localStorage.removeItem('user');
     setUser(null);
   };
 

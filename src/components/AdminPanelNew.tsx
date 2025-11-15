@@ -83,6 +83,10 @@ export function AdminPanelNew() {
   const [showEditProductsModal, setShowEditProductsModal] = useState(false);
   const [editedDetails, setEditedDetails] = useState<PurchaseDetail[]>([]);
   
+  // Estados para modal de comprobante
+  const [showComprobanteModal, setShowComprobanteModal] = useState(false);
+  const [currentComprobante, setCurrentComprobante] = useState<string | null>(null);
+  
   // Estado para Google Sheets URL
   const [googleSheetsUrl, setGoogleSheetsUrl] = useState<string>('');
   
@@ -980,15 +984,21 @@ export function AdminPanelNew() {
                         <span className="capitalize">{purchase.metodo_pago}</span>
                       </div>
                       {purchase.comprobante_archivo && (
-                        <a
-                          href={purchase.comprobante_archivo.startsWith('data:') ? purchase.comprobante_archivo : getApiUrl(purchase.comprobante_archivo)}
-                          target="_blank"
-                          rel="noopener noreferrer"
+                        <button
+                          onClick={() => {
+                            const comprobante = purchase.comprobante_archivo!;
+                            setCurrentComprobante(
+                              comprobante.startsWith('data:') 
+                                ? comprobante 
+                                : getApiUrl(comprobante)
+                            );
+                            setShowComprobanteModal(true);
+                          }}
                           className="flex items-center gap-2 text-blue-400 hover:text-blue-300 transition-colors"
                         >
                           <span className="material-icons">receipt</span>
                           Ver Comprobante
-                        </a>
+                        </button>
                       )}
                     </div>
 
@@ -1189,6 +1199,46 @@ export function AdminPanelNew() {
                 >
                   <Save className="w-5 h-5" />
                   Guardar Cambios
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Modal para ver comprobante */}
+        {showComprobanteModal && currentComprobante && (
+          <div className="fixed inset-0 bg-black/80 flex items-center justify-center z-50 p-4" onClick={() => setShowComprobanteModal(false)}>
+            <div className="bg-gray-900 rounded-2xl max-w-4xl w-full max-h-[90vh] overflow-auto" onClick={(e) => e.stopPropagation()}>
+              {/* Encabezado del modal */}
+              <div className="flex items-center justify-between p-6 border-b border-gray-700">
+                <h3 className="text-xl font-semibold text-white">Comprobante de Transferencia</h3>
+                <button
+                  onClick={() => setShowComprobanteModal(false)}
+                  className="text-gray-400 hover:text-white transition-colors"
+                >
+                  <span className="material-icons">close</span>
+                </button>
+              </div>
+
+              {/* Imagen del comprobante */}
+              <div className="p-6">
+                <img 
+                  src={currentComprobante} 
+                  alt="Comprobante de transferencia" 
+                  className="w-full h-auto rounded-lg shadow-lg"
+                  onError={(e) => {
+                    e.currentTarget.src = 'https://via.placeholder.com/400x600?text=Error+al+cargar+imagen';
+                  }}
+                />
+              </div>
+
+              {/* Botón de cerrar */}
+              <div className="p-6 border-t border-gray-700 flex justify-end">
+                <button
+                  onClick={() => setShowComprobanteModal(false)}
+                  className="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+                >
+                  Cerrar
                 </button>
               </div>
             </div>
