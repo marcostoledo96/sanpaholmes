@@ -14,7 +14,7 @@ const storage = multer.memoryStorage();
 const upload = multer({
   storage: storage,
   limits: { 
-    fileSize: 4 * 1024 * 1024 // Máximo 4MB (Vercel tiene límite de 4.5MB en body)
+    fileSize: 2 * 1024 * 1024 // Máximo 2MB (más seguro para Base64 en PostgreSQL)
   },
   fileFilter: (req, file, cb) => {
     const tiposPermitidos = /jpeg|jpg|png|webp/;
@@ -34,7 +34,21 @@ router.post('/', upload.single('comprobante'), async (req, res) => {
   const client = await pool.connect(); // Usamos una transacción
 
   try {
+    console.log('=== INICIO POST /api/compras ===');
+    console.log('Body keys:', Object.keys(req.body));
+    console.log('File exists:', !!req.file);
+    if (req.file) {
+      console.log('File size:', req.file.size, 'bytes');
+      console.log('File mimetype:', req.file.mimetype);
+    }
+
     const { comprador_nombre, comprador_telefono, comprador_mesa, metodo_pago, productos, detalles_pedido } = req.body;
+
+    console.log('comprador_nombre:', comprador_nombre);
+    console.log('comprador_mesa:', comprador_mesa);
+    console.log('metodo_pago:', metodo_pago);
+    console.log('productos type:', typeof productos);
+    console.log('productos:', productos?.substring ? productos.substring(0, 100) : productos);
 
     // Validamos los datos obligatorios
     if (!comprador_nombre || !comprador_mesa || !metodo_pago) {
@@ -129,16 +143,40 @@ router.post('/', upload.single('comprobante'), async (req, res) => {
     // Si hay archivo, lo convertimos a Base64 con el formato data:image/jpeg;base64,...
     let comprobante_archivo = null;
     if (req.file) {
-      const base64String = req.file.buffer.toString('base64');
-      comprobante_archivo = `data:${req.file.mimetype};base64,${base64String}`;
+      console.log('Convirtiendo archivo a Base64...');
+      console.log('Buffer size:', req.file.buffer.length);
+      
+      try {
+        const base64String = req.file.buffer.toString('base64');
+        comprobante_archivo = `data:${req.file.mimetype};base64,${base64String}`;
+        console.log('Base64 length:', comprobante_archivo.length);
+        
+        // Verificar que no exceda 10MB en Base64 (límite razonable para PostgreSQL TEXT)
+        if (comprobante_archivo.length > 10 * 1024 * 1024) {
+          await client.query('ROLLBACK');
+          return res.status(400).json({
+            success: false,
+            mensaje: 'El archivo es demasiado grande. Por favor usá una imagen más pequeña o de menor calidad.'
+          });
+        }
+      } catch (conversionError) {
+        console.error('Error al convertir a Base64:', conversionError);
+        await client.query('ROLLBACK');
+        return res.status(500).json({
+          success: false,
+          mensaje: 'Error al procesar el archivo'
+        });
+      }
     }
 
+    console.log('Insertando compra en BD...');
     const compra = await client.query(
       `INSERT INTO compras (comprador_nombre, comprador_telefono, comprador_mesa, metodo_pago, comprobante_archivo, total, detalles_pedido)
        VALUES ($1, $2, $3, $4, $5, $6, $7)
        RETURNING *`,
       [comprador_nombre, comprador_telefono || null, comprador_mesa, metodo_pago, comprobante_archivo, total, detalles_pedido || null]
     );
+    console.log('Compra insertada con ID:', compra.rows[0].id);
 
     // 4️⃣ Registramos el detalle de la compra y descontamos stock
     for (const item of productosArray) {
@@ -180,9 +218,12 @@ router.post('/', upload.single('comprobante'), async (req, res) => {
     // Si hay algún error, revertimos todo
     await client.query('ROLLBACK');
     console.error('Error al crear compra:', error);
+    console.error('Error stack:', error.stack);
+    console.error('Error message:', error.message);
     res.status(500).json({
       success: false,
-      mensaje: 'Error al procesar la compra'
+      mensaje: 'Error al procesar la compra',
+      error: process.env.NODE_ENV === 'development' ? error.message : undefined
     });
   } finally {
     client.release();

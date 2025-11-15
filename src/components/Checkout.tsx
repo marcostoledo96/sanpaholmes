@@ -106,16 +106,25 @@ export function Checkout() {
     if (e.target.files && e.target.files[0]) {
       const file = e.target.files[0];
       
-      // Validar tamaño (máximo 4MB)
-      if (file.size > 4 * 1024 * 1024) {
+      // Validar tamaño (máximo 2MB - más seguro para Base64)
+      if (file.size > 2 * 1024 * 1024) {
         toast.error('El archivo es muy grande', {
-          description: 'Máximo 4MB permitido',
+          description: 'Máximo 2MB permitido. Usá una foto de menor calidad.',
+        });
+        return;
+      }
+      
+      // Validar tipo de archivo
+      if (!file.type.startsWith('image/')) {
+        toast.error('Solo se permiten imágenes', {
+          description: 'Formatos válidos: JPG, PNG, WEBP',
         });
         return;
       }
       
       setTransferProof(file);
-      toast.success('Comprobante cargado correctamente');
+      const sizeMB = (file.size / 1024 / 1024).toFixed(2);
+      toast.success(`Comprobante cargado correctamente (${sizeMB}MB)`);
     }
   };
 
@@ -266,7 +275,7 @@ export function Checkout() {
                     <div className="mt-6 p-6 bg-[#0f0f0f] rounded-2xl border border-[#fbbf24]/30 shadow-inner">
                       <p className="text-[#fbbf24] mb-3 font-medium">Datos para transferencia:</p>
                       <p className="text-white mb-1">Alias: <span className="text-[#fbbf24] font-semibold">SANPAHOLMES.EVENTO</span></p>
-                      <p className="text-gray-400 text-sm mb-6">Por favor subí el comprobante (máx. 4MB)</p>
+                      <p className="text-gray-400 text-sm mb-6">Por favor subí el comprobante (máx. 2MB - foto de baja calidad)</p>
                       
                       <Label htmlFor="proof" className="cursor-pointer">
                         <div className="flex items-center gap-3 p-4 bg-[#1f1f1f] border-2 border-dashed border-[#fbbf24]/50 rounded-xl hover:bg-[#2a2a2a] hover:border-[#fbbf24] transition-all duration-300 group">
