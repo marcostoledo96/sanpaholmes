@@ -527,61 +527,53 @@ export function AdminPanelNew() {
   };
 
   // Enviar notificación por WhatsApp cuando el pedido está listo
-  const handleNotifyWhatsApp = (purchase: Purchase) => {
-    console.log('🟢 handleNotifyWhatsApp llamado');
-    console.log('Purchase:', purchase);
+  const openWhatsApp = (purchase: Purchase) => {
+    console.log('🟢 openWhatsApp ejecutado');
+    console.log('📱 Purchase:', purchase);
     
-    // Verificar que tenga teléfono
     if (!purchase.comprador_telefono) {
       toast.error('Este pedido no tiene número de teléfono registrado');
       return;
     }
 
-    // Limpiar el número de teléfono (quitar espacios, guiones, etc.)
+    // Limpiar el número de teléfono
     let telefono = purchase.comprador_telefono.replace(/\D/g, '');
-    console.log('Teléfono limpio:', telefono);
     
     // Si no tiene código de país, agregar el de Argentina (54)
     if (!telefono.startsWith('54')) {
-      // Si empieza con 0, quitarlo (formato local)
-      if (telefono.startsWith('0')) {
-        telefono = telefono.substring(1);
-      }
-      // Si empieza con 15, quitarlo (formato celular viejo)
-      if (telefono.startsWith('15')) {
-        telefono = telefono.substring(2);
-      }
+      if (telefono.startsWith('0')) telefono = telefono.substring(1);
+      if (telefono.startsWith('15')) telefono = telefono.substring(2);
       telefono = '54' + telefono;
     }
-    console.log('Teléfono final:', telefono);
 
-    // Crear mensaje personalizado sin emojis
+    // Crear mensaje personalizado
     const mensaje = `Hola *${purchase.comprador_nombre}*!\n\nTu pedido del evento *SanpaHolmes* ya está listo para ser retirado.\n\n*Pedido #${purchase.id}*\n${purchase.comprador_mesa ? `*Mesa:* ${purchase.comprador_mesa}\n` : ''}*Total:* $${purchase.total}\n\nPodés pasar a retirarlo cuando quieras. Gracias por tu compra!`;
 
     // Crear URL de WhatsApp
     const whatsappUrl = `https://wa.me/${telefono}?text=${encodeURIComponent(mensaje)}`;
-    console.log('URL de WhatsApp:', whatsappUrl);
+    console.log('🔗 URL:', whatsappUrl);
 
-    // Abrir en nueva pestaña - usar método más compatible
-    try {
-      const ventana = window.open(whatsappUrl, '_blank', 'noopener,noreferrer');
-      if (!ventana) {
-        console.error('❌ window.open fue bloqueado por el navegador');
-        toast.error('Por favor habilita las ventanas emergentes para usar WhatsApp', {
-          description: 'Tu navegador bloqueó la apertura automática',
-        });
-        // Como fallback, intentar abrir directamente
-        window.location.href = whatsappUrl;
-      } else {
-        console.log('✅ Ventana de WhatsApp abierta');
-        toast.success(`Abriendo WhatsApp para notificar a ${purchase.comprador_nombre}`, {
-          description: `Número: ${purchase.comprador_telefono}`,
-        });
-      }
-    } catch (error) {
-      console.error('Error al abrir WhatsApp:', error);
-      toast.error('Error al abrir WhatsApp. Intenta manualmente.');
+    // Abrir WhatsApp
+    window.open(whatsappUrl, '_blank', 'noopener,noreferrer');
+    
+    toast.success(`Abriendo WhatsApp para ${purchase.comprador_nombre}`);
+  };
+
+  // Generar URL de WhatsApp para un pedido
+  const getWhatsAppUrl = (purchase: Purchase): string => {
+    if (!purchase.comprador_telefono) return '#';
+
+    let telefono = purchase.comprador_telefono.replace(/\D/g, '');
+    
+    if (!telefono.startsWith('54')) {
+      if (telefono.startsWith('0')) telefono = telefono.substring(1);
+      if (telefono.startsWith('15')) telefono = telefono.substring(2);
+      telefono = '54' + telefono;
     }
+
+    const mensaje = `Hola *${purchase.comprador_nombre}*!\n\nTu pedido del evento *SanpaHolmes* ya está listo para ser retirado.\n\n*Pedido #${purchase.id}*\n${purchase.comprador_mesa ? `*Mesa:* ${purchase.comprador_mesa}\n` : ''}*Total:* $${purchase.total}\n\nPodés pasar a retirarlo cuando quieras. Gracias por tu compra!`;
+
+    return `https://wa.me/${telefono}?text=${encodeURIComponent(mensaje)}`;
   };
 
   // Eliminar compra
@@ -1110,6 +1102,7 @@ export function AdminPanelNew() {
                     {/* Controles de estado y acciones */}
                     <div className="border-t border-gray-700 pt-4 flex flex-wrap gap-3">
                       <button
+                        type="button"
                         onClick={() => handleToggleStatus(purchase.id, 'abonado', purchase.abonado)}
                         className={`flex items-center gap-2 px-4 py-2 rounded-lg transition-colors ${
                           purchase.abonado 
@@ -1121,6 +1114,7 @@ export function AdminPanelNew() {
                         {purchase.abonado ? 'Marcar como no abonado' : 'Marcar como abonado'}
                       </button>
                       <button
+                        type="button"
                         onClick={() => handleToggleStatus(purchase.id, 'listo', purchase.listo)}
                         className={`flex items-center gap-2 px-4 py-2 rounded-lg transition-colors ${
                           purchase.listo 
@@ -1131,18 +1125,30 @@ export function AdminPanelNew() {
                         <CheckCircle className="w-4 h-4" />
                         {purchase.listo ? 'Marcar como no listo' : 'Marcar como listo'}
                       </button>
-                      {/* Botón de notificar por WhatsApp - solo si está listo y no entregado */}
+                      
+                      {/* Botón de notificar por WhatsApp - ENLACE DIRECTO */}
                       {purchase.comprador_telefono && purchase.listo && !purchase.entregado && (
-                        <button
-                          onClick={() => handleNotifyWhatsApp(purchase)}
-                          className="flex items-center gap-2 px-4 py-2 bg-green-600/20 text-green-400 rounded-lg hover:bg-green-600/30 transition-colors"
-                          title="Notificar que el pedido está listo"
-                        >
-                          <span className="material-icons text-base">whatsapp</span>
-                          Pedido Listo
-                        </button>
+                        <>
+                          <div className="w-full" />
+                          <a
+                            href={getWhatsAppUrl(purchase)}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            onClick={() => {
+                              console.log('🔴 CLICK EN ENLACE WHATSAPP');
+                              toast.success(`Abriendo WhatsApp para ${purchase.comprador_nombre}`);
+                            }}
+                            className="flex items-center gap-2 px-4 py-2 bg-green-600/20 text-green-400 rounded-lg hover:bg-green-600/30 transition-colors border-2 border-green-500/50 no-underline"
+                            title="Notificar que el pedido está listo"
+                          >
+                            <span className="material-icons text-base">whatsapp</span>
+                            <span>Pedido Listo - Notificar por WhatsApp</span>
+                          </a>
+                        </>
                       )}
+                      
                       <button
+                        type="button"
                         onClick={() => handleToggleStatus(purchase.id, 'entregado', purchase.entregado)}
                         className={`flex items-center gap-2 px-4 py-2 rounded-lg transition-colors ${
                           purchase.entregado 
