@@ -10,6 +10,7 @@ import { toast } from 'sonner';
 export function VendorLogin() {
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
+  const [rememberMe, setRememberMe] = useState(true);
   const [isLoading, setIsLoading] = useState(false);
   const { login } = useAuth();
   const navigate = useNavigate();
@@ -20,7 +21,7 @@ export function VendorLogin() {
     setIsLoading(true);
     
     try {
-      const success = await login(username, password);
+      const success = await login(username, password, rememberMe);
       
       if (success) {
         toast.success('Acceso autorizado', {
@@ -89,6 +90,19 @@ export function VendorLogin() {
                 placeholder="Ingresá tu contraseña"
                 required
               />
+            </div>
+
+            <div className="flex items-center gap-3">
+              <input
+                id="remember"
+                type="checkbox"
+                checked={rememberMe}
+                onChange={(e) => setRememberMe(e.target.checked)}
+                className="w-5 h-5 rounded border-[#fbbf24]/30 bg-[#0f0f0f] text-[#fbbf24] focus:ring-[#fbbf24] focus:ring-offset-0 cursor-pointer"
+              />
+              <Label htmlFor="remember" className="text-gray-300 text-sm cursor-pointer">
+                Recordar sesión
+              </Label>
             </div>
 
             <PoliceButton

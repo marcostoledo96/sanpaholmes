@@ -106,6 +106,7 @@ export function AdminPanelNew() {
 
   // Mostrar loading mientras se verifica la sesión
   if (authLoading) {
+    console.log('AdminPanelNew: Esperando verificación de sesión...');
     return (
       <div className="min-h-screen flex items-center justify-center bg-black">
         <div className="text-center">
@@ -118,9 +119,12 @@ export function AdminPanelNew() {
 
   // Si el usuario no está autenticado, redirigir al login
   if (!user) {
+    console.log('AdminPanelNew: Usuario no autenticado, redirigiendo...');
     navigate('/vendor/login');
     return null;
   }
+  
+  console.log('AdminPanelNew: Usuario autenticado:', user);
 
   // useEffect se ejecuta cuando el componente se monta o cambia la pestaña activa
   // Sirve para cargar los datos del backend según la pestaña seleccionada
