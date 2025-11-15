@@ -65,6 +65,7 @@ export function AdminPanelNew() {
   const [purchases, setPurchases] = useState<Purchase[]>([]);
   const [filteredPurchases, setFilteredPurchases] = useState<Purchase[]>([]);
   const [loading, setLoading] = useState(false);
+  const [showInactiveProducts, setShowInactiveProducts] = useState(false); // Filtro para mostrar/ocultar inactivos
   
   // Redirigir al login si no hay usuario (pero solo después de cargar)
   useEffect(() => {
@@ -773,8 +774,19 @@ export function AdminPanelNew() {
         {/* Pestaña de Productos */}
         {activeTab === 'products' && (
           <div>
-            <div className="flex justify-between items-center mb-10">
-              <h2 className="text-white">Lista de Productos ({Array.isArray(products) ? products.length : 0})</h2>
+            <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-10">
+              <div>
+                <h2 className="text-white mb-2">Lista de Productos ({Array.isArray(products) ? products.filter(p => showInactiveProducts || (p as any).activo).length : 0})</h2>
+                <label className="flex items-center gap-2 text-gray-400 text-sm cursor-pointer">
+                  <input
+                    type="checkbox"
+                    checked={showInactiveProducts}
+                    onChange={(e) => setShowInactiveProducts(e.target.checked)}
+                    className="w-4 h-4 rounded border-gray-600 text-[#fbbf24] focus:ring-[#fbbf24] focus:ring-offset-0 bg-black"
+                  />
+                  Mostrar productos eliminados
+                </label>
+              </div>
               <PoliceButton variant="primary" icon={Plus} onClick={handleNewProduct}>
                 Nuevo Producto
               </PoliceButton>
@@ -792,7 +804,9 @@ export function AdminPanelNew() {
               </div>
             ) : (
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                {products.map((product) => (
+                {products
+                  .filter(product => showInactiveProducts || (product as any).activo)
+                  .map((product) => (
                   <div
                     key={product.id}
                     className="bg-gradient-to-br from-[#1f1f1f] to-[#0f0f0f] border border-[#fbbf24]/20 rounded-2xl overflow-hidden hover:border-[#fbbf24]/50 transition-all duration-300 shadow-lg"
@@ -860,7 +874,8 @@ export function AdminPanelNew() {
                       </div>
                     </div>
                   </div>
-                ))}
+                ))
+                }
               </div>
             )}
           </div>
