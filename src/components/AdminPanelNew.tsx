@@ -981,7 +981,7 @@ export function AdminPanelNew() {
                       </div>
                       {purchase.comprobante_archivo && (
                         <a
-                          href={getApiUrl(purchase.comprobante_archivo)}
+                          href={purchase.comprobante_archivo.startsWith('data:') ? purchase.comprobante_archivo : getApiUrl(purchase.comprobante_archivo)}
                           target="_blank"
                           rel="noopener noreferrer"
                           className="flex items-center gap-2 text-blue-400 hover:text-blue-300 transition-colors"
