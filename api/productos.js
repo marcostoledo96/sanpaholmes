@@ -8,6 +8,7 @@ const { verificarAutenticacion, verificarPermiso } = require('../middleware/auth
 
 // 📋 GET /api/productos - Listar todos los productos activos
 // Esta ruta es pública, cualquiera puede ver los productos
+// SOLO devuelve productos con activo = true (para el menú público)
 router.get('/', async (req, res) => {
   try {
     const { categoria, subcategoria } = req.query;
@@ -53,6 +54,46 @@ router.get('/', async (req, res) => {
 
   } catch (error) {
     console.error('Error al obtener productos:', error);
+    res.status(500).json({
+      success: false,
+      mensaje: 'Error al obtener los productos'
+    });
+  }
+});
+
+// 🔐 GET /api/productos/admin/all - Listar TODOS los productos (activos e inactivos)
+// Esta ruta es solo para administradores autenticados
+router.get('/admin/all', verificarAutenticacion, async (req, res) => {
+  try {
+    const { categoria, subcategoria } = req.query;
+
+    // Armamos la consulta según los filtros (SIN filtrar por activo)
+    let query = 'SELECT * FROM productos WHERE 1=1';
+    const params = [];
+
+    if (categoria) {
+      params.push(categoria);
+      query += ` AND categoria = $${params.length}`;
+    }
+
+    if (subcategoria) {
+      params.push(subcategoria);
+      query += ` AND subcategoria = $${params.length}`;
+    }
+
+    query += ' ORDER BY activo DESC, categoria, subcategoria, nombre';
+
+    const result = await pool.query(query, params);
+
+    console.log(`🔐 GET /api/productos/admin/all - Devolviendo ${result.rows.length} productos (incluyendo inactivos)`);
+
+    res.json({
+      success: true,
+      productos: result.rows
+    });
+
+  } catch (error) {
+    console.error('Error al obtener todos los productos:', error);
     res.status(500).json({
       success: false,
       mensaje: 'Error al obtener los productos'

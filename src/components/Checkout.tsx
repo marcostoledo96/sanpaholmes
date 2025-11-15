@@ -270,17 +270,42 @@ export function Checkout() {
                   </div>
 
                   {formData.paymentMethod === 'transferencia' && (
-                    <div className="mt-6 p-6 bg-[#0f0f0f] rounded-2xl border border-[#fbbf24]/30 shadow-inner">
-                      <p className="text-[#fbbf24] mb-3 font-medium">Datos para transferencia:</p>
-                      <p className="text-white mb-1">Alias: <span className="text-[#fbbf24] font-semibold">SANPAHOLMES.EVENTO</span></p>
-                      <p className="text-gray-400 text-sm mb-6">Por favor subí el comprobante (máx. 2MB - foto de baja calidad)</p>
+                    <div className="mt-6 p-4 sm:p-6 bg-[#0f0f0f] rounded-2xl border border-[#fbbf24]/30 shadow-inner space-y-4">
+                      <div className="flex items-center gap-2 mb-4">
+                        <CreditCard className="w-5 h-5 text-[#fbbf24]" />
+                        <p className="text-[#fbbf24] font-medium text-sm sm:text-base">Datos para transferencia:</p>
+                      </div>
                       
-                      <Label htmlFor="proof" className="cursor-pointer">
-                        <div className="flex items-center gap-3 p-4 bg-[#1f1f1f] border-2 border-dashed border-[#fbbf24]/50 rounded-xl hover:bg-[#2a2a2a] hover:border-[#fbbf24] transition-all duration-300 group">
-                          <div className="p-2 bg-gradient-to-br from-[#fbbf24] to-[#f59e0b] rounded-lg group-hover:scale-110 transition-transform">
-                            <Upload className="w-5 h-5 text-black" />
+                      <div className="bg-black/40 rounded-xl p-3 sm:p-4 space-y-2.5 sm:space-y-3">
+                        <div className="flex flex-col sm:flex-row sm:justify-between gap-1 sm:gap-2">
+                          <span className="text-gray-400 text-xs sm:text-sm">Alias:</span>
+                          <span className="text-[#fbbf24] font-semibold text-sm sm:text-base break-all">sanpaholmes</span>
+                        </div>
+                        
+                        <div className="flex flex-col sm:flex-row sm:justify-between gap-1 sm:gap-2">
+                          <span className="text-gray-400 text-xs sm:text-sm">CBU:</span>
+                          <span className="text-white font-mono text-xs sm:text-sm break-all">0110015030001511247783</span>
+                        </div>
+                        
+                        <div className="flex flex-col sm:flex-row sm:justify-between gap-1 sm:gap-2">
+                          <span className="text-gray-400 text-xs sm:text-sm">Titular:</span>
+                          <span className="text-white text-xs sm:text-sm">Julieta Agustina Mallol</span>
+                        </div>
+                        
+                        <div className="flex flex-col sm:flex-row sm:justify-between gap-1 sm:gap-2">
+                          <span className="text-gray-400 text-xs sm:text-sm">CUIL:</span>
+                          <span className="text-white font-mono text-xs sm:text-sm">27-45747374-0</span>
+                        </div>
+                      </div>
+                      
+                      <p className="text-gray-400 text-xs sm:text-sm mt-4">Por favor subí el comprobante (máx. 2MB - foto de baja calidad)</p>
+                      
+                      <Label htmlFor="proof" className="cursor-pointer block mt-4">
+                        <div className="flex items-center gap-3 p-3 sm:p-4 bg-[#1f1f1f] border-2 border-dashed border-[#fbbf24]/50 rounded-xl hover:bg-[#2a2a2a] hover:border-[#fbbf24] transition-all duration-300 group">
+                          <div className="p-2 bg-gradient-to-br from-[#fbbf24] to-[#f59e0b] rounded-lg group-hover:scale-110 transition-transform flex-shrink-0">
+                            <Upload className="w-4 h-4 sm:w-5 sm:h-5 text-black" />
                           </div>
-                          <span className="text-white font-medium">
+                          <span className="text-white font-medium text-sm sm:text-base truncate">
                             {transferProof ? transferProof.name : 'Subir comprobante'}
                           </span>
                         </div>

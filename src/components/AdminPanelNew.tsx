@@ -159,8 +159,15 @@ export function AdminPanelNew() {
   const fetchProducts = async () => {
     setLoading(true);
     try {
-      // Hacemos la petición al servidor backend en el puerto 3000
-      const response = await fetch(getApiUrl('/api/productos'));
+      // Obtenemos el token de autenticación
+      const token = localStorage.getItem('token');
+      
+      // Hacemos la petición al endpoint de admin que devuelve TODOS los productos
+      const response = await fetch(getApiUrl('/api/productos/admin/all'), {
+        headers: {
+          'Authorization': `Bearer ${token}`
+        }
+      });
       
       // Verificamos si la respuesta fue exitosa (código 200-299)
       if (!response.ok) {
