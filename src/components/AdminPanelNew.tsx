@@ -1128,23 +1128,20 @@ export function AdminPanelNew() {
                       
                       {/* Botón de notificar por WhatsApp - ENLACE DIRECTO */}
                       {purchase.comprador_telefono && purchase.listo && !purchase.entregado && (
-                        <>
-                          <div className="w-full" />
-                          <a
-                            href={getWhatsAppUrl(purchase)}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            onClick={() => {
-                              console.log('🔴 CLICK EN ENLACE WHATSAPP');
-                              toast.success(`Abriendo WhatsApp para ${purchase.comprador_nombre}`);
-                            }}
-                            className="flex items-center gap-2 px-4 py-2 bg-green-600/20 text-green-400 rounded-lg hover:bg-green-600/30 transition-colors border-2 border-green-500/50 no-underline"
-                            title="Notificar que el pedido está listo"
-                          >
-                            <span className="material-icons text-base">whatsapp</span>
-                            <span>Pedido Listo - Notificar por WhatsApp</span>
-                          </a>
-                        </>
+                        <a
+                          href={getWhatsAppUrl(purchase)}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          onClick={() => {
+                            console.log('🔴 CLICK EN ENLACE WHATSAPP');
+                            toast.success(`Abriendo WhatsApp para ${purchase.comprador_nombre}`);
+                          }}
+                          className="flex items-center gap-2 px-4 py-2 bg-green-600/20 text-green-400 rounded-lg hover:bg-green-600/30 transition-colors no-underline"
+                          title="Notificar que el pedido está listo"
+                        >
+                          <span className="material-icons text-base">whatsapp</span>
+                          <span>Notificar WhatsApp</span>
+                        </a>
                       )}
                       
                       <button
