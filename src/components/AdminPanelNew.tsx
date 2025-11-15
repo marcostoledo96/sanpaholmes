@@ -415,13 +415,14 @@ export function AdminPanelNew() {
         // Mostrar indicador de procesamiento
         toast.info('Procesando imagen de alta calidad...');
 
-        // Opciones de compresión para MÁXIMA CALIDAD
+        // Opciones de compresión OPTIMIZADAS para Vercel (límite 4.5MB en body)
+        // Base64 aumenta ~33% el tamaño, entonces 3MB → ~4MB Base64 (seguro)
         const options = {
-          maxSizeMB: 8,              // Tamaño máximo más generoso (8MB)
-          maxWidthOrHeight: 2400,     // Resolución alta (2400px)
+          maxSizeMB: 3,               // Tamaño máximo reducido para seguridad
+          maxWidthOrHeight: 1600,     // Resolución alta pero controlada (1600px)
           useWebWorker: true,         // Usar worker para no bloquear UI
-          quality: 0.95,              // Calidad muy alta (95%)
-          alwaysKeepResolution: false, // Permitir reducción solo si es necesaria
+          quality: 0.92,              // Calidad alta (92%) - buen balance
+          alwaysKeepResolution: false, // Permitir reducción si es necesaria
           fileType: 'image/jpeg'      // JPEG con alta calidad
         };
 
@@ -430,6 +431,13 @@ export function AdminPanelNew() {
         
         console.log('📷 Imagen original:', (file.size / 1024 / 1024).toFixed(2), 'MB');
         console.log('📷 Imagen optimizada:', (compressedFile.size / 1024 / 1024).toFixed(2), 'MB');
+        
+        // Validación de tamaño Base64 estimado (imagen * 1.33)
+        const estimatedBase64Size = compressedFile.size * 1.33;
+        if (estimatedBase64Size > 4 * 1024 * 1024) { // 4MB en Base64
+          toast.error('La imagen es demasiado grande. Intenta con una foto más pequeña.');
+          return;
+        }
         
         setImagenFile(compressedFile);
 

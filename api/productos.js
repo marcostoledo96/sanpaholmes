@@ -28,7 +28,7 @@ const fileFilter = (req, file, cb) => {
 const upload = multer({
   storage: storage,
   fileFilter: fileFilter,
-  limits: { fileSize: 10 * 1024 * 1024 } // Máximo 10MB para imágenes de alta calidad
+  limits: { fileSize: 5 * 1024 * 1024 } // Máximo 5MB (balance entre calidad y compatibilidad)
 });
 
 // 📋 GET /api/productos - Listar todos los productos activos
@@ -61,9 +61,15 @@ router.get('/', async (req, res) => {
         id: result.rows[0].id,
         nombre: result.rows[0].nombre,
         categoria: result.rows[0].categoria,
-        subcategoria: result.rows[0].subcategoria
+        subcategoria: result.rows[0].subcategoria,
+        activo: result.rows[0].activo
       });
     }
+
+    // Headers para evitar caché
+    res.set('Cache-Control', 'no-cache, no-store, must-revalidate');
+    res.set('Pragma', 'no-cache');
+    res.set('Expires', '0');
 
     res.json({
       success: true,
@@ -175,13 +181,14 @@ router.put('/:id', verificarAutenticacion, verificarPermiso('gestionar_productos
     const { id } = req.params;
     const { nombre, categoria, subcategoria, precio, stock, descripcion, activo } = req.body;
 
-    console.log('PUT /api/productos/:id - Datos recibidos:', { 
+    console.log('📝 PUT /api/productos/:id - Datos recibidos:', { 
       id, 
       nombre, 
       categoria, 
       subcategoria, 
       precio,
-      file: req.file ? 'SÍ' : 'NO' 
+      file: req.file ? 'SÍ' : 'NO',
+      fileSize: req.file ? `${(req.file.size / 1024 / 1024).toFixed(2)} MB` : 'N/A'
     });
 
     // Verificamos que el producto existe
@@ -231,12 +238,24 @@ router.put('/:id', verificarAutenticacion, verificarPermiso('gestionar_productos
     });
 
   } catch (error) {
-    console.error('Error al actualizar producto:', error);
+    console.error('❌ Error al actualizar producto:', error);
     console.error('Stack trace:', error.stack);
+    console.error('Error name:', error.name);
+    console.error('Error code:', error.code);
+    
+    // Detectar errores específicos
+    let mensajeUsuario = 'Error al actualizar el producto';
+    if (error.code === '22001') {
+      mensajeUsuario = 'La imagen es demasiado grande para la base de datos';
+    } else if (error.message && error.message.includes('payload')) {
+      mensajeUsuario = 'El archivo es demasiado grande';
+    }
+    
     res.status(500).json({
       success: false,
-      mensaje: 'Error al actualizar el producto',
-      error: process.env.NODE_ENV === 'development' ? error.message : undefined
+      mensaje: mensajeUsuario,
+      error: process.env.NODE_ENV === 'development' ? error.message : undefined,
+      errorCode: error.code
     });
   }
 });
@@ -262,10 +281,16 @@ router.delete('/:id', verificarAutenticacion, verificarPermiso('gestionar_produc
     }
 
     // Lo marcamos como inactivo en lugar de eliminarlo
-    await pool.query(
-      'UPDATE productos SET activo = false WHERE id = $1',
+    const result = await pool.query(
+      'UPDATE productos SET activo = false WHERE id = $1 RETURNING id, nombre, activo',
       [id]
     );
+
+    console.log('🗑️ Producto marcado como inactivo:', {
+      id: result.rows[0].id,
+      nombre: result.rows[0].nombre,
+      activo: result.rows[0].activo
+    });
 
     res.json({
       success: true,
