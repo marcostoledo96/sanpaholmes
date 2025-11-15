@@ -176,7 +176,7 @@ export function Checkout() {
 
                   <div>
                     <Label htmlFor="phone" className="text-gray-300 mb-2 block">
-                      Teléfono <span className="text-gray-500">(opcional)</span>
+                      Teléfono
                     </Label>
                     <Input
                       id="phone"
@@ -190,7 +190,7 @@ export function Checkout() {
 
                   <div>
                     <Label htmlFor="tableNumber" className="text-gray-300 mb-2 block">
-                      Número de Mesa <span className="text-gray-500">(Que aparece en su cartel. Si no tiene mesa, deje vacío)</span>
+                      Número de Mesa <span className="text-gray-500">Que aparece en su cartel. Si no tiene mesa, deje vacío</span>
                     </Label>
                     <Input
                       id="tableNumber"
@@ -206,7 +206,7 @@ export function Checkout() {
 
                   <div>
                     <Label htmlFor="details" className="text-gray-300 mb-2 block">
-                      Observaciones <span className="text-gray-500">(opcional)</span>
+                      Observaciones
                     </Label>
                     <textarea
                       id="details"
