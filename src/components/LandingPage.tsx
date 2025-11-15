@@ -62,7 +62,7 @@ export function LandingPage() {
             Navegá por nuestro menú de evidencias y realizá tu pedido de forma rápida y sencilla.
           </p>
 
-          <div className="animate-in fade-in slide-in-from-bottom-4 duration-700 delay-700">
+          <div className="flex justify-center animate-in fade-in slide-in-from-bottom-4 duration-700 delay-700">
             <PoliceButton
               variant="primary"
               icon={ShoppingBag}
@@ -182,12 +182,14 @@ export function LandingPage() {
           <p className="text-gray-300 mb-6 sm:mb-10 text-base sm:text-lg leading-relaxed px-2">
             Explorá nuestro menú completo de merienda y cena
           </p>
-          <PoliceButton
-            variant="primary"
-            onClick={() => navigate('/menu')}
-          >
-            Abrir Menú de Evidencias
-          </PoliceButton>
+          <div className="flex justify-center">
+            <PoliceButton
+              variant="primary"
+              onClick={() => navigate('/menu')}
+            >
+              Abrir Menú de Evidencias
+            </PoliceButton>
+          </div>
         </div>
       </div>
     </div>

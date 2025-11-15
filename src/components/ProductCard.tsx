@@ -24,11 +24,6 @@ export function ProductCard({ product, onAddToCart }: ProductCardProps) {
         <div className="absolute top-3 right-3">
           <CategoryBadge category={product.category} />
         </div>
-        
-        {/* Evidence number */}
-        <div className="absolute top-3 left-3 bg-black/70 backdrop-blur-sm text-[#fbbf24] px-3 py-1.5 border border-[#fbbf24]/30 rounded-lg text-sm">
-          #{product.id}
-        </div>
       </div>
 
       {/* Content */}
