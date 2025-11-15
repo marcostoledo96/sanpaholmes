@@ -106,10 +106,10 @@ export function Checkout() {
     if (e.target.files && e.target.files[0]) {
       const file = e.target.files[0];
       
-      // Validar tamaño (máximo 2MB - más seguro para Base64)
-      if (file.size > 2 * 1024 * 1024) {
+      // Validar tamaño (máximo 3MB - más seguro para Base64)
+      if (file.size > 3 * 1024 * 1024) {
         toast.error('El archivo es muy grande', {
-          description: 'Máximo 2MB permitido. Usá una foto de menor calidad.',
+          description: 'Máximo 3MB permitido. Usá una foto de menor calidad.',
         });
         return;
       }
@@ -298,7 +298,7 @@ export function Checkout() {
                         </div>
                       </div>
                       
-                      <p className="text-gray-400 text-xs sm:text-sm mt-4">Por favor subí el comprobante (máx. 2MB - foto de baja calidad)</p>
+                      <p className="text-gray-400 text-xs sm:text-sm mt-4">Por favor subí el comprobante (máx. 3MB - foto de baja calidad)</p>
                       
                       <Label htmlFor="proof" className="cursor-pointer block mt-4">
                         <div className="flex items-center gap-3 p-3 sm:p-4 bg-[#1f1f1f] border-2 border-dashed border-[#fbbf24]/50 rounded-xl hover:bg-[#2a2a2a] hover:border-[#fbbf24] transition-all duration-300 group">

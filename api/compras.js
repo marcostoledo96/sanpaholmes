@@ -14,7 +14,7 @@ const storage = multer.memoryStorage();
 const upload = multer({
   storage: storage,
   limits: { 
-    fileSize: 2 * 1024 * 1024 // Máximo 2MB (más seguro para Base64 en PostgreSQL)
+    fileSize: 3 * 1024 * 1024 // Máximo 3MB (más seguro para Base64 en PostgreSQL)
   },
   fileFilter: (req, file, cb) => {
     const tiposPermitidos = /jpeg|jpg|png|webp/;
