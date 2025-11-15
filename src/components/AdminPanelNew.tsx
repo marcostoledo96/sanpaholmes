@@ -1152,7 +1152,7 @@ export function AdminPanelNew() {
                           onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'rgba(22, 163, 74, 0.2)'}
                           title="Notificar que el pedido está listo"
                         >
-                          <span className="material-icons" style={{ fontSize: '1rem', lineHeight: 1 }}>whatsapp</span>
+                          <span style={{ fontSize: '1.2rem', lineHeight: 1 }}>📱</span>
                           <span>Notificar WhatsApp</span>
                         </a>
                       )}
