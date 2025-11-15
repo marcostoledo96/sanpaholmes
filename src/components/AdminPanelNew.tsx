@@ -525,6 +525,45 @@ export function AdminPanelNew() {
     }
   };
 
+  // Enviar notificación por WhatsApp cuando el pedido está listo
+  const handleNotifyWhatsApp = (purchase: Purchase) => {
+    // Verificar que tenga teléfono
+    if (!purchase.comprador_telefono) {
+      toast.error('Este pedido no tiene número de teléfono registrado');
+      return;
+    }
+
+    // Limpiar el número de teléfono (quitar espacios, guiones, etc.)
+    let telefono = purchase.comprador_telefono.replace(/\D/g, '');
+    
+    // Si no tiene código de país, agregar el de Argentina (54)
+    if (!telefono.startsWith('54')) {
+      // Si empieza con 0, quitarlo (formato local)
+      if (telefono.startsWith('0')) {
+        telefono = telefono.substring(1);
+      }
+      // Si empieza con 15, quitarlo (formato celular viejo)
+      if (telefono.startsWith('15')) {
+        telefono = telefono.substring(2);
+      }
+      telefono = '54' + telefono;
+    }
+
+    // Crear mensaje personalizado
+    const mensaje = `¡Hola *${purchase.comprador_nombre}*! 🎉\n\nTu pedido del evento *SanpaHolmes* ya está listo para ser retirado. 🔍✨\n\n📦 *Pedido #${purchase.id}*\n${purchase.comprador_mesa ? `📍 *Mesa:* ${purchase.comprador_mesa}\n` : ''}💰 *Total:* $${purchase.total}\n\nPodés pasar a retirarlo cuando quieras. ¡Gracias por tu compra! 🍔☕`;
+
+    // Crear URL de WhatsApp
+    const whatsappUrl = `https://wa.me/${telefono}?text=${encodeURIComponent(mensaje)}`;
+
+    // Abrir en nueva pestaña
+    window.open(whatsappUrl, '_blank');
+
+    // Mostrar confirmación
+    toast.success(`Abriendo WhatsApp para notificar a ${purchase.comprador_nombre}`, {
+      description: `Número: ${purchase.comprador_telefono}`,
+    });
+  };
+
   // Eliminar compra
   const handleDeletePurchase = async (purchaseId: number) => {
     if (!confirm('¿Estás seguro de eliminar esta compra? Esta acción no se puede deshacer.')) {
@@ -1069,6 +1108,17 @@ export function AdminPanelNew() {
                         <CheckCheck className="w-4 h-4" />
                         {purchase.entregado ? 'Marcar como no entregado' : 'Marcar como entregado'}
                       </button>
+                      {/* Botón de notificar por WhatsApp */}
+                      {purchase.comprador_telefono && !purchase.entregado && (
+                        <button
+                          onClick={() => handleNotifyWhatsApp(purchase)}
+                          className="flex items-center gap-2 px-4 py-2 bg-green-600/20 text-green-400 rounded-lg hover:bg-green-600/30 transition-colors"
+                          title="Notificar que el pedido está listo"
+                        >
+                          <span className="material-icons text-base">whatsapp</span>
+                          Pedido Listo
+                        </button>
+                      )}
                       <button
                         onClick={() => handleEditPurchase(purchase)}
                         className="flex items-center gap-2 px-4 py-2 bg-blue-600/20 text-blue-400 rounded-lg hover:bg-blue-600/30 transition-colors"
