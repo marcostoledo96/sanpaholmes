@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { useCart } from '../context/CartContext';
 import { useNavigate } from 'react-router-dom';
 import { PoliceButton } from './PoliceButton';
-import { FileText, CreditCard, Banknote } from 'lucide-react';
+import { FileText, Upload, CreditCard, Banknote } from 'lucide-react';
 import { Label } from './ui/label';
 import { Input } from './ui/input';
 import { toast } from 'sonner';
@@ -20,7 +20,7 @@ export function Checkout() {
     details: '',
   });
 
-  const [transferProofUrl, setTransferProofUrl] = useState('');
+  const [transferProof, setTransferProof] = useState<File | null>(null);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -32,37 +32,44 @@ export function Checkout() {
       return;
     }
 
-    if (formData.paymentMethod === 'transferencia' && !transferProofUrl.trim()) {
-      toast.error('Por favor pegá la URL del comprobante de transferencia', {
-        description: 'Evidencia de pago requerida (Imgur/ImgBB)',
+    if (formData.paymentMethod === 'transferencia' && !transferProof) {
+      toast.error('Por favor subí el comprobante de transferencia', {
+        description: 'Evidencia de pago requerida',
       });
       return;
     }
 
     try {
-      // Preparar datos para enviar al backend
+      // Preparar datos para enviar al backend como FormData
+      const formDataToSend = new FormData();
+      formDataToSend.append('comprador_nombre', formData.fullName);
+      if (formData.phone) {
+        formDataToSend.append('comprador_telefono', formData.phone);
+      }
+      formDataToSend.append('comprador_mesa', formData.tableNumber);
+      formDataToSend.append('metodo_pago', formData.paymentMethod);
+      
+      // Agregar detalles del pedido si existen
+      if (formData.details) {
+        formDataToSend.append('detalles_pedido', formData.details);
+      }
+      
+      // Convertir carrito al formato esperado por el backend
       const productos = cart.map(item => ({
         producto_id: parseInt(item.product.id),
         cantidad: item.quantity
       }));
-
-      const bodyData = {
-        comprador_nombre: formData.fullName,
-        comprador_telefono: formData.phone || null,
-        comprador_mesa: formData.tableNumber,
-        metodo_pago: formData.paymentMethod,
-        detalles_pedido: formData.details || null,
-        productos: productos,
-        comprobante_url: transferProofUrl || null
-      };
+      formDataToSend.append('productos', JSON.stringify(productos));
+      
+      // Agregar comprobante si existe
+      if (transferProof) {
+        formDataToSend.append('comprobante', transferProof);
+      }
 
       // Enviar al backend
       const response = await fetch(getApiUrl('/api/compras'), {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(bodyData),
+        body: formDataToSend,
       });
 
       const data = await response.json();
@@ -95,8 +102,21 @@ export function Checkout() {
     }
   };
 
-  const handleProofUrlChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setTransferProofUrl(e.target.value);
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files && e.target.files[0]) {
+      const file = e.target.files[0];
+      
+      // Validar tamaño (máximo 4MB)
+      if (file.size > 4 * 1024 * 1024) {
+        toast.error('El archivo es muy grande', {
+          description: 'Máximo 4MB permitido',
+        });
+        return;
+      }
+      
+      setTransferProof(file);
+      toast.success('Comprobante cargado correctamente');
+    }
   };
 
   if (cart.length === 0) {
@@ -246,19 +266,25 @@ export function Checkout() {
                     <div className="mt-6 p-6 bg-[#0f0f0f] rounded-2xl border border-[#fbbf24]/30 shadow-inner">
                       <p className="text-[#fbbf24] mb-3 font-medium">Datos para transferencia:</p>
                       <p className="text-white mb-1">Alias: <span className="text-[#fbbf24] font-semibold">SANPAHOLMES.EVENTO</span></p>
-                      <p className="text-gray-400 text-sm mb-4">Subí tu comprobante a <a href="https://imgur.com/upload" target="_blank" rel="noopener noreferrer" className="text-[#fbbf24] hover:underline">Imgur</a> o <a href="https://imgbb.com/" target="_blank" rel="noopener noreferrer" className="text-[#fbbf24] hover:underline">ImgBB</a> y pegá el link acá</p>
+                      <p className="text-gray-400 text-sm mb-6">Por favor subí el comprobante (máx. 4MB)</p>
                       
-                      <Label htmlFor="proofUrl" className="text-white mb-2 block">
-                        URL del comprobante *
+                      <Label htmlFor="proof" className="cursor-pointer">
+                        <div className="flex items-center gap-3 p-4 bg-[#1f1f1f] border-2 border-dashed border-[#fbbf24]/50 rounded-xl hover:bg-[#2a2a2a] hover:border-[#fbbf24] transition-all duration-300 group">
+                          <div className="p-2 bg-gradient-to-br from-[#fbbf24] to-[#f59e0b] rounded-lg group-hover:scale-110 transition-transform">
+                            <Upload className="w-5 h-5 text-black" />
+                          </div>
+                          <span className="text-white font-medium">
+                            {transferProof ? transferProof.name : 'Subir comprobante'}
+                          </span>
+                        </div>
+                        <Input
+                          id="proof"
+                          type="file"
+                          accept="image/*"
+                          onChange={handleFileChange}
+                          className="hidden"
+                        />
                       </Label>
-                      <Input
-                        id="proofUrl"
-                        type="text"
-                        placeholder="https://i.imgur.com/ejemplo.png"
-                        value={transferProofUrl}
-                        onChange={handleProofUrlChange}
-                        className="bg-[#1f1f1f] border-[#fbbf24]/50 text-white placeholder:text-gray-500 focus:border-[#fbbf24]"
-                      />
                     </div>
                   )}
                 </div>
