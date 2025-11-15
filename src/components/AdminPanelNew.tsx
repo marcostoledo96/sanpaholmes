@@ -66,6 +66,16 @@ export function AdminPanelNew() {
   const [filteredPurchases, setFilteredPurchases] = useState<Purchase[]>([]);
   const [loading, setLoading] = useState(false);
   
+  // Redirigir al login si no hay usuario (pero solo después de cargar)
+  useEffect(() => {
+    if (!authLoading && !user) {
+      console.log('AdminPanelNew: Usuario no autenticado, redirigiendo...');
+      navigate('/vendor/login');
+    } else if (user) {
+      console.log('AdminPanelNew: Usuario autenticado:', user);
+    }
+  }, [authLoading, user, navigate]);
+  
   // Estados para búsqueda de compras
   const [searchQuery, setSearchQuery] = useState('');
   
@@ -117,14 +127,17 @@ export function AdminPanelNew() {
     );
   }
 
-  // Si el usuario no está autenticado, redirigir al login
+  // Si no hay usuario, mostrar loading (el useEffect redirigirá)
   if (!user) {
-    console.log('AdminPanelNew: Usuario no autenticado, redirigiendo...');
-    navigate('/vendor/login');
-    return null;
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-black">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-16 w-16 border-t-4 border-[#fbbf24] border-solid mx-auto mb-4"></div>
+          <p className="text-gray-400">Redirigiendo...</p>
+        </div>
+      </div>
+    );
   }
-  
-  console.log('AdminPanelNew: Usuario autenticado:', user);
 
   // useEffect se ejecuta cuando el componente se monta o cambia la pestaña activa
   // Sirve para cargar los datos del backend según la pestaña seleccionada

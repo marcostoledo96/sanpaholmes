@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { PoliceButton } from './PoliceButton';
@@ -15,6 +15,17 @@ export function VendorLogin() {
   const { login } = useAuth();
   const navigate = useNavigate();
 
+  // Cargar credenciales guardadas al montar
+  useEffect(() => {
+    const savedUsername = localStorage.getItem('savedUsername');
+    const savedPassword = localStorage.getItem('savedPassword');
+    const savedRemember = localStorage.getItem('savedRemember');
+    
+    if (savedUsername) setUsername(savedUsername);
+    if (savedPassword) setPassword(savedPassword);
+    if (savedRemember !== null) setRememberMe(savedRemember === 'true');
+  }, []);
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
@@ -24,6 +35,17 @@ export function VendorLogin() {
       const success = await login(username, password, rememberMe);
       
       if (success) {
+        // Guardar credenciales si el usuario quiere recordar
+        if (rememberMe) {
+          localStorage.setItem('savedUsername', username);
+          localStorage.setItem('savedPassword', password);
+          localStorage.setItem('savedRemember', 'true');
+        } else {
+          localStorage.removeItem('savedUsername');
+          localStorage.removeItem('savedPassword');
+          localStorage.removeItem('savedRemember');
+        }
+        
         toast.success('Acceso autorizado', {
           description: 'Bienvenido al panel de control',
         });
