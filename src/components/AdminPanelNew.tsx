@@ -528,6 +528,9 @@ export function AdminPanelNew() {
 
   // Enviar notificación por WhatsApp cuando el pedido está listo
   const handleNotifyWhatsApp = (purchase: Purchase) => {
+    console.log('🟢 handleNotifyWhatsApp llamado');
+    console.log('Purchase:', purchase);
+    
     // Verificar que tenga teléfono
     if (!purchase.comprador_telefono) {
       toast.error('Este pedido no tiene número de teléfono registrado');
@@ -536,6 +539,7 @@ export function AdminPanelNew() {
 
     // Limpiar el número de teléfono (quitar espacios, guiones, etc.)
     let telefono = purchase.comprador_telefono.replace(/\D/g, '');
+    console.log('Teléfono limpio:', telefono);
     
     // Si no tiene código de país, agregar el de Argentina (54)
     if (!telefono.startsWith('54')) {
@@ -549,20 +553,35 @@ export function AdminPanelNew() {
       }
       telefono = '54' + telefono;
     }
+    console.log('Teléfono final:', telefono);
 
     // Crear mensaje personalizado sin emojis
     const mensaje = `Hola *${purchase.comprador_nombre}*!\n\nTu pedido del evento *SanpaHolmes* ya está listo para ser retirado.\n\n*Pedido #${purchase.id}*\n${purchase.comprador_mesa ? `*Mesa:* ${purchase.comprador_mesa}\n` : ''}*Total:* $${purchase.total}\n\nPodés pasar a retirarlo cuando quieras. Gracias por tu compra!`;
 
     // Crear URL de WhatsApp
     const whatsappUrl = `https://wa.me/${telefono}?text=${encodeURIComponent(mensaje)}`;
+    console.log('URL de WhatsApp:', whatsappUrl);
 
-    // Abrir en nueva pestaña
-    window.open(whatsappUrl, '_blank');
-
-    // Mostrar confirmación
-    toast.success(`Abriendo WhatsApp para notificar a ${purchase.comprador_nombre}`, {
-      description: `Número: ${purchase.comprador_telefono}`,
-    });
+    // Abrir en nueva pestaña - usar método más compatible
+    try {
+      const ventana = window.open(whatsappUrl, '_blank', 'noopener,noreferrer');
+      if (!ventana) {
+        console.error('❌ window.open fue bloqueado por el navegador');
+        toast.error('Por favor habilita las ventanas emergentes para usar WhatsApp', {
+          description: 'Tu navegador bloqueó la apertura automática',
+        });
+        // Como fallback, intentar abrir directamente
+        window.location.href = whatsappUrl;
+      } else {
+        console.log('✅ Ventana de WhatsApp abierta');
+        toast.success(`Abriendo WhatsApp para notificar a ${purchase.comprador_nombre}`, {
+          description: `Número: ${purchase.comprador_telefono}`,
+        });
+      }
+    } catch (error) {
+      console.error('Error al abrir WhatsApp:', error);
+      toast.error('Error al abrir WhatsApp. Intenta manualmente.');
+    }
   };
 
   // Eliminar compra
