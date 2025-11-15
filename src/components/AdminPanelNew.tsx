@@ -89,6 +89,8 @@ export function AdminPanelNew() {
   // Estados para el formulario de producto (crear/editar)
   const [showProductForm, setShowProductForm] = useState(false);
   const [editingProduct, setEditingProduct] = useState<Product | null>(null);
+  const [imagenFile, setImagenFile] = useState<File | null>(null);
+  const [imagenPreview, setImagenPreview] = useState<string>('');
   const [formData, setFormData] = useState({
     nombre: '',
     descripcion: '',
@@ -219,26 +221,31 @@ export function AdminPanelNew() {
         return;
       }
 
-      const productData = {
-        nombre: formData.nombre.trim(),
-        descripcion: formData.descripcion.trim() || null,
-        precio: parseFloat(formData.precio),
-        stock: parseInt(formData.stock),
-        categoria: formData.categoria,
-        subcategoria: formData.subcategoria.trim() || null,
-        imagen_url: formData.imagen_url.trim() || null,
-      };
+      // Usamos FormData para enviar archivo + datos
+      const formDataToSend = new FormData();
+      formDataToSend.append('nombre', formData.nombre.trim());
+      formDataToSend.append('descripcion', formData.descripcion.trim() || '');
+      formDataToSend.append('precio', formData.precio);
+      formDataToSend.append('stock', formData.stock);
+      formDataToSend.append('categoria', formData.categoria);
+      formDataToSend.append('subcategoria', formData.subcategoria.trim() || '');
+      formDataToSend.append('activo', formData.activo.toString());
 
-      console.log('Creando producto:', productData);
+      // Si hay archivo de imagen, lo agregamos
+      if (imagenFile) {
+        formDataToSend.append('imagen', imagenFile);
+      }
+
+      console.log('Creando producto con imagen');
       
       // Hacemos una petición POST para crear el producto
       const response = await fetch(getApiUrl('/api/productos'), {
         method: 'POST',
         headers: {
-          'Content-Type': 'application/json',
           'Authorization': `Bearer ${token}`,
+          // NO ponemos Content-Type, el navegador lo hace automáticamente con FormData
         },
-        body: JSON.stringify(productData),
+        body: formDataToSend,
       });
       
       const data = await response.json();
@@ -289,30 +296,31 @@ export function AdminPanelNew() {
         return;
       }
 
-      // Combinamos categoria y subcategoria: "merienda-bebidas"
-      const categoriaCompleta = `${formData.categoria}-${formData.subcategoria}`;
+      // Usamos FormData para enviar archivo + datos
+      const formDataToSend = new FormData();
+      formDataToSend.append('nombre', formData.nombre.trim());
+      formDataToSend.append('descripcion', formData.descripcion.trim() || '');
+      formDataToSend.append('precio', formData.precio);
+      formDataToSend.append('stock', formData.stock);
+      formDataToSend.append('categoria', formData.categoria);
+      formDataToSend.append('subcategoria', formData.subcategoria.trim() || '');
+      formDataToSend.append('activo', formData.activo.toString());
 
-      const productData = {
-        nombre: formData.nombre.trim(),
-        descripcion: formData.descripcion.trim() || null,
-        precio: parseFloat(formData.precio),
-        stock: parseInt(formData.stock),
-        categoria: categoriaCompleta,
-        subcategoria: formData.subcategoria,
-        imagen_url: formData.imagen_url.trim() || null,
-        activo: true,
-      };
+      // Si hay archivo de imagen nuevo, lo agregamos
+      if (imagenFile) {
+        formDataToSend.append('imagen', imagenFile);
+      }
 
-      console.log('Actualizando producto:', editingProduct.id, productData);
+      console.log('Actualizando producto:', editingProduct.id);
       
       // Usamos PUT para actualizar un recurso existente
       const response = await fetch(getApiUrl(`/api/productos/${editingProduct.id}`), {
         method: 'PUT',
         headers: {
-          'Content-Type': 'application/json',
           'Authorization': `Bearer ${token}`,
+          // NO ponemos Content-Type con FormData
         },
-        body: JSON.stringify(productData),
+        body: formDataToSend,
       });
       
       const data = await response.json();
@@ -375,6 +383,35 @@ export function AdminPanelNew() {
       imagen_url: '',
       activo: true,
     });
+    setImagenFile(null);
+    setImagenPreview('');
+  };
+
+  // Manejador para cambio de archivo de imagen
+  const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      // Validar tamaño (máximo 5MB)
+      if (file.size > 5 * 1024 * 1024) {
+        toast.error('La imagen no puede superar los 5MB');
+        return;
+      }
+
+      // Validar tipo
+      if (!file.type.startsWith('image/')) {
+        toast.error('Solo se permiten archivos de imagen');
+        return;
+      }
+
+      setImagenFile(file);
+
+      // Crear preview
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setImagenPreview(reader.result as string);
+      };
+      reader.readAsDataURL(file);
+    }
   };
 
   // Función para abrir el formulario en modo edición
@@ -404,6 +441,11 @@ export function AdminPanelNew() {
       imagen_url: prod.imagen_url || '',
       activo: prod.activo ?? true,
     });
+    
+    // Limpiar preview de imagen nueva pero mantener la URL existente
+    setImagenFile(null);
+    setImagenPreview('');
+    
     setShowProductForm(true);
   };
 
@@ -1327,19 +1369,49 @@ export function AdminPanelNew() {
                   </Select>
                 </div>
 
-                {/* URL de imagen */}
-                <div>
-                  <Label htmlFor="imagen_url" className="text-gray-300 mb-2 flex items-center gap-2">
+                {/* Imagen del producto */}
+                <div className="space-y-3">
+                  <Label className="text-gray-300 mb-2 flex items-center gap-2">
                     <span className="material-icons text-sm">image</span>
-                    URL de la imagen (opcional)
+                    Imagen del producto
                   </Label>
-                  <Input
-                    id="imagen_url"
-                    value={formData.imagen_url}
-                    onChange={(e) => setFormData({ ...formData, imagen_url: e.target.value })}
-                    className="bg-black/50 border-[#fbbf24]/30 text-white"
-                    placeholder="https://ejemplo.com/imagen.jpg"
-                  />
+                  
+                  {/* Input para subir archivo */}
+                  <div className="flex flex-col gap-3">
+                    <Input
+                      type="file"
+                      accept="image/*"
+                      onChange={handleImageChange}
+                      className="bg-black/50 border-[#fbbf24]/30 text-white file:mr-4 file:py-2 file:px-4 file:rounded file:border-0 file:bg-[#fbbf24] file:text-black file:font-semibold hover:file:bg-[#f59e0b]"
+                    />
+                    
+                    {/* Preview de la imagen */}
+                    {(imagenPreview || (editingProduct && formData.imagen_url)) && (
+                      <div className="relative w-40 h-40 border-2 border-[#fbbf24]/30 rounded-lg overflow-hidden">
+                        <img
+                          src={imagenPreview || formData.imagen_url}
+                          alt="Preview"
+                          className="w-full h-full object-cover"
+                        />
+                        {imagenPreview && (
+                          <button
+                            type="button"
+                            onClick={() => {
+                              setImagenFile(null);
+                              setImagenPreview('');
+                            }}
+                            className="absolute top-2 right-2 bg-red-500 text-white p-1 rounded-full hover:bg-red-600"
+                          >
+                            <X className="w-4 h-4" />
+                          </button>
+                        )}
+                      </div>
+                    )}
+                    
+                    <p className="text-xs text-gray-400">
+                      Formatos permitidos: JPG, PNG, GIF, WEBP • Tamaño máximo: 5MB
+                    </p>
+                  </div>
                 </div>
 
                 {/* Disponible */}
