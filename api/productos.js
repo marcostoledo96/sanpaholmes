@@ -4,32 +4,7 @@
 const express = require('express');
 const router = express.Router();
 const pool = require('../db/connection');
-const multer = require('multer');
-const path = require('path');
 const { verificarAutenticacion, verificarPermiso } = require('../middleware/auth');
-
-// Configuración de multer para Vercel (usa memoria en vez de disco)
-// En Vercel serverless, el sistema de archivos es efímero, así que guardamos en memoria
-const storage = multer.memoryStorage();
-
-// Filtro para aceptar solo imágenes
-const fileFilter = (req, file, cb) => {
-  const tiposPermitidos = /jpeg|jpg|png|gif|webp/;
-  const extname = tiposPermitidos.test(path.extname(file.originalname).toLowerCase());
-  const mimetype = tiposPermitidos.test(file.mimetype);
-
-  if (extname && mimetype) {
-    return cb(null, true);
-  } else {
-    cb(new Error('Solo se permiten archivos de imagen (JPG, PNG, GIF, WEBP)'));
-  }
-};
-
-const upload = multer({
-  storage: storage,
-  fileFilter: fileFilter,
-  limits: { fileSize: 5 * 1024 * 1024 } // Máximo 5MB (balance entre calidad y compatibilidad)
-});
 
 // 📋 GET /api/productos - Listar todos los productos activos
 // Esta ruta es pública, cualquiera puede ver los productos
@@ -118,9 +93,9 @@ router.get('/:id', async (req, res) => {
 
 // ➕ POST /api/productos - Crear un nuevo producto
 // Solo usuarios con permiso 'gestionar_productos' pueden hacer esto
-router.post('/', verificarAutenticacion, verificarPermiso('gestionar_productos'), upload.single('imagen'), async (req, res) => {
+router.post('/', verificarAutenticacion, verificarPermiso('gestionar_productos'), async (req, res) => {
   try {
-    const { nombre, categoria, subcategoria, precio, stock, descripcion, activo } = req.body;
+    const { nombre, categoria, subcategoria, precio, stock, descripcion, imagen_url, activo } = req.body;
 
     // Logging para debug de categoria/subcategoria
     console.log('POST /api/productos - Datos recibidos:', {
@@ -128,7 +103,7 @@ router.post('/', verificarAutenticacion, verificarPermiso('gestionar_productos')
       categoria,
       subcategoria,
       precio,
-      hasFile: !!req.file
+      imagen_url: imagen_url ? 'SÍ' : 'NO'
     });
 
     // Validamos que los campos obligatorios estén presentes
@@ -139,20 +114,12 @@ router.post('/', verificarAutenticacion, verificarPermiso('gestionar_productos')
       });
     }
 
-    // Si se subió una imagen, la convertimos a Base64 Data URL
-    let imagen_url = null;
-    if (req.file) {
-      const base64Image = req.file.buffer.toString('base64');
-      const mimeType = req.file.mimetype;
-      imagen_url = `data:${mimeType};base64,${base64Image}`;
-    }
-
-    // Insertamos el producto
+    // Insertamos el producto con la URL de imagen directamente
     const result = await pool.query(
       `INSERT INTO productos (nombre, categoria, subcategoria, precio, stock, descripcion, imagen_url, activo)
        VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
        RETURNING *`,
-      [nombre, categoria, subcategoria || null, precio, stock || 0, descripcion || null, imagen_url, activo !== undefined ? activo : true]
+      [nombre, categoria, subcategoria || null, precio, stock || 0, descripcion || null, imagen_url || null, activo !== undefined ? activo : true]
     );
 
     console.log('✅ Producto creado con ID:', result.rows[0].id, '| Categoria:', result.rows[0].categoria, '| Subcategoria:', result.rows[0].subcategoria);
@@ -176,10 +143,10 @@ router.post('/', verificarAutenticacion, verificarPermiso('gestionar_productos')
 
 // ✏️ PUT /api/productos/:id - Actualizar un producto
 // Solo usuarios con permiso 'gestionar_productos' pueden hacer esto
-router.put('/:id', verificarAutenticacion, verificarPermiso('gestionar_productos'), upload.single('imagen'), async (req, res) => {
+router.put('/:id', verificarAutenticacion, verificarPermiso('gestionar_productos'), async (req, res) => {
   try {
     const { id } = req.params;
-    const { nombre, categoria, subcategoria, precio, stock, descripcion, activo } = req.body;
+    const { nombre, categoria, subcategoria, precio, stock, descripcion, imagen_url, activo } = req.body;
 
     console.log('📝 PUT /api/productos/:id - Datos recibidos:', { 
       id, 
@@ -187,13 +154,12 @@ router.put('/:id', verificarAutenticacion, verificarPermiso('gestionar_productos
       categoria, 
       subcategoria, 
       precio,
-      file: req.file ? 'SÍ' : 'NO',
-      fileSize: req.file ? `${(req.file.size / 1024 / 1024).toFixed(2)} MB` : 'N/A'
+      imagen_url: imagen_url ? 'SÍ' : 'NO'
     });
 
     // Verificamos que el producto existe
     const productoExiste = await pool.query(
-      'SELECT id, imagen_url FROM productos WHERE id = $1',
+      'SELECT id FROM productos WHERE id = $1',
       [id]
     );
 
@@ -204,16 +170,7 @@ router.put('/:id', verificarAutenticacion, verificarPermiso('gestionar_productos
       });
     }
 
-    // Si se subió una nueva imagen, la convertimos a Base64, sino mantenemos la anterior
-    let imagen_url = productoExiste.rows[0].imagen_url;
-    if (req.file) {
-      const base64Image = req.file.buffer.toString('base64');
-      const mimeType = req.file.mimetype;
-      imagen_url = `data:${mimeType};base64,${base64Image}`;
-      console.log('Nueva imagen procesada, tamaño:', req.file.size, 'bytes');
-    }
-
-    // Actualizamos el producto
+    // Actualizamos el producto con la URL de imagen directamente
     const result = await pool.query(
       `UPDATE productos 
        SET nombre = COALESCE($1, nombre),
@@ -240,22 +197,11 @@ router.put('/:id', verificarAutenticacion, verificarPermiso('gestionar_productos
   } catch (error) {
     console.error('❌ Error al actualizar producto:', error);
     console.error('Stack trace:', error.stack);
-    console.error('Error name:', error.name);
-    console.error('Error code:', error.code);
-    
-    // Detectar errores específicos
-    let mensajeUsuario = 'Error al actualizar el producto';
-    if (error.code === '22001') {
-      mensajeUsuario = 'La imagen es demasiado grande para la base de datos';
-    } else if (error.message && error.message.includes('payload')) {
-      mensajeUsuario = 'El archivo es demasiado grande';
-    }
     
     res.status(500).json({
       success: false,
-      mensaje: mensajeUsuario,
-      error: process.env.NODE_ENV === 'development' ? error.message : undefined,
-      errorCode: error.code
+      mensaje: 'Error al actualizar el producto',
+      error: process.env.NODE_ENV === 'development' ? error.message : undefined
     });
   }
 });

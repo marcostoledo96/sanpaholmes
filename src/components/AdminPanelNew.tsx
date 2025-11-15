@@ -5,7 +5,6 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { PoliceButton } from './PoliceButton';
-import imageCompression from 'browser-image-compression';
 import { 
   Package, ShoppingBag, Edit2, Trash2, Plus, 
   FileText, CheckCircle, CheckCheck, X, Save 
@@ -90,8 +89,6 @@ export function AdminPanelNew() {
   // Estados para el formulario de producto (crear/editar)
   const [showProductForm, setShowProductForm] = useState(false);
   const [editingProduct, setEditingProduct] = useState<Product | null>(null);
-  const [imagenFile, setImagenFile] = useState<File | null>(null);
-  const [imagenPreview, setImagenPreview] = useState<string>('');
   const [formData, setFormData] = useState({
     nombre: '',
     descripcion: '',
@@ -229,31 +226,28 @@ export function AdminPanelNew() {
         return;
       }
 
-      // Usamos FormData para enviar archivo + datos
-      const formDataToSend = new FormData();
-      formDataToSend.append('nombre', formData.nombre.trim());
-      formDataToSend.append('descripcion', formData.descripcion.trim() || '');
-      formDataToSend.append('precio', formData.precio);
-      formDataToSend.append('stock', formData.stock);
-      formDataToSend.append('categoria', formData.categoria);
-      formDataToSend.append('subcategoria', formData.subcategoria.trim() || '');
-      formDataToSend.append('activo', formData.activo.toString());
+      // Preparamos los datos del producto (JSON simple)
+      const productoData = {
+        nombre: formData.nombre.trim(),
+        descripcion: formData.descripcion.trim() || '',
+        precio: parseFloat(formData.precio),
+        stock: parseInt(formData.stock),
+        categoria: formData.categoria,
+        subcategoria: formData.subcategoria.trim() || '',
+        imagen_url: formData.imagen_url.trim() || null,
+        activo: formData.activo
+      };
 
-      // Si hay archivo de imagen, lo agregamos
-      if (imagenFile) {
-        formDataToSend.append('imagen', imagenFile);
-      }
-
-      console.log('Creando producto con imagen');
+      console.log('Creando producto:', productoData);
       
       // Hacemos una petición POST para crear el producto
       const response = await fetch(getApiUrl('/api/productos'), {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${token}`,
-          // NO ponemos Content-Type, el navegador lo hace automáticamente con FormData
+          'Content-Type': 'application/json'
         },
-        body: formDataToSend,
+        body: JSON.stringify(productoData),
       });
       
       const data = await response.json();
@@ -304,31 +298,28 @@ export function AdminPanelNew() {
         return;
       }
 
-      // Usamos FormData para enviar archivo + datos
-      const formDataToSend = new FormData();
-      formDataToSend.append('nombre', formData.nombre.trim());
-      formDataToSend.append('descripcion', formData.descripcion.trim() || '');
-      formDataToSend.append('precio', formData.precio);
-      formDataToSend.append('stock', formData.stock);
-      formDataToSend.append('categoria', formData.categoria);
-      formDataToSend.append('subcategoria', formData.subcategoria.trim() || '');
-      formDataToSend.append('activo', formData.activo.toString());
+      // Preparamos los datos del producto (JSON simple)
+      const productoData = {
+        nombre: formData.nombre.trim(),
+        descripcion: formData.descripcion.trim() || '',
+        precio: parseFloat(formData.precio),
+        stock: parseInt(formData.stock),
+        categoria: formData.categoria,
+        subcategoria: formData.subcategoria.trim() || '',
+        imagen_url: formData.imagen_url.trim() || null,
+        activo: formData.activo
+      };
 
-      // Si hay archivo de imagen nuevo, lo agregamos
-      if (imagenFile) {
-        formDataToSend.append('imagen', imagenFile);
-      }
-
-      console.log('Actualizando producto:', editingProduct.id);
+      console.log('Actualizando producto:', editingProduct.id, productoData);
       
       // Usamos PUT para actualizar un recurso existente
       const response = await fetch(getApiUrl(`/api/productos/${editingProduct.id}`), {
         method: 'PUT',
         headers: {
           'Authorization': `Bearer ${token}`,
-          // NO ponemos Content-Type con FormData
+          'Content-Type': 'application/json'
         },
-        body: formDataToSend,
+        body: JSON.stringify(productoData),
       });
       
       const data = await response.json();
@@ -391,68 +382,6 @@ export function AdminPanelNew() {
       imagen_url: '',
       activo: true,
     });
-    setImagenFile(null);
-    setImagenPreview('');
-  };
-
-  // Manejador para cambio de archivo de imagen con compresión de alta calidad
-  const handleImageChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (file) {
-      // Validar tamaño original (máximo 20MB antes de comprimir)
-      if (file.size > 20 * 1024 * 1024) {
-        toast.error('La imagen original no puede superar los 20MB');
-        return;
-      }
-
-      // Validar tipo
-      if (!file.type.startsWith('image/')) {
-        toast.error('Solo se permiten archivos de imagen');
-        return;
-      }
-
-      try {
-        // Mostrar indicador de procesamiento
-        toast.info('Procesando imagen de alta calidad...');
-
-        // Opciones de compresión OPTIMIZADAS para Vercel (límite 4.5MB en body)
-        // Base64 aumenta ~33% el tamaño, entonces 3MB → ~4MB Base64 (seguro)
-        const options = {
-          maxSizeMB: 3,               // Tamaño máximo reducido para seguridad
-          maxWidthOrHeight: 1600,     // Resolución alta pero controlada (1600px)
-          useWebWorker: true,         // Usar worker para no bloquear UI
-          quality: 0.92,              // Calidad alta (92%) - buen balance
-          alwaysKeepResolution: false, // Permitir reducción si es necesaria
-          fileType: 'image/jpeg'      // JPEG con alta calidad
-        };
-
-        // Comprimir imagen manteniendo alta calidad
-        const compressedFile = await imageCompression(file, options);
-        
-        console.log('📷 Imagen original:', (file.size / 1024 / 1024).toFixed(2), 'MB');
-        console.log('📷 Imagen optimizada:', (compressedFile.size / 1024 / 1024).toFixed(2), 'MB');
-        
-        // Validación de tamaño Base64 estimado (imagen * 1.33)
-        const estimatedBase64Size = compressedFile.size * 1.33;
-        if (estimatedBase64Size > 4 * 1024 * 1024) { // 4MB en Base64
-          toast.error('La imagen es demasiado grande. Intenta con una foto más pequeña.');
-          return;
-        }
-        
-        setImagenFile(compressedFile);
-
-        // Crear preview de alta calidad
-        const reader = new FileReader();
-        reader.onloadend = () => {
-          setImagenPreview(reader.result as string);
-          toast.success('Imagen de alta calidad lista');
-        };
-        reader.readAsDataURL(compressedFile);
-      } catch (error) {
-        console.error('Error al procesar imagen:', error);
-        toast.error('Error al procesar la imagen');
-      }
-    }
   };
 
   // Función para abrir el formulario en modo edición
@@ -490,10 +419,6 @@ export function AdminPanelNew() {
       imagen_url: prod.imagen_url || '',
       activo: prod.activo ?? true,
     });
-    
-    // Limpiar preview de imagen nueva pero mantener la URL existente
-    setImagenFile(null);
-    setImagenPreview('');
     
     setShowProductForm(true);
   };
@@ -1422,44 +1347,40 @@ export function AdminPanelNew() {
                 <div className="space-y-3">
                   <Label className="text-gray-300 mb-2 flex items-center gap-2">
                     <span className="material-icons text-sm">image</span>
-                    Imagen del producto
+                    Imagen del producto (URL)
                   </Label>
                   
-                  {/* Input para subir archivo */}
+                  {/* Input para URL de imagen */}
                   <div className="flex flex-col gap-3">
                     <Input
-                      type="file"
-                      accept="image/*"
-                      onChange={handleImageChange}
-                      className="bg-black/50 border-[#fbbf24]/30 text-white file:mr-4 file:py-2 file:px-4 file:rounded file:border-0 file:bg-[#fbbf24] file:text-black file:font-semibold hover:file:bg-[#f59e0b]"
+                      type="url"
+                      placeholder="https://i.imgur.com/ejemplo.jpg"
+                      value={formData.imagen_url}
+                      onChange={(e) => setFormData({ ...formData, imagen_url: e.target.value })}
+                      className="bg-black/50 border-[#fbbf24]/30 text-white placeholder:text-gray-500"
                     />
                     
+                    <p className="text-xs text-gray-400">
+                      💡 <strong>Cómo subir imágenes:</strong><br/>
+                      1. Ve a <a href="https://imgur.com/upload" target="_blank" rel="noopener noreferrer" className="text-[#fbbf24] hover:underline">imgur.com/upload</a><br/>
+                      2. Sube tu imagen (sin necesidad de cuenta)<br/>
+                      3. Clic derecho en la imagen → "Copiar dirección de imagen"<br/>
+                      4. Pega la URL aquí
+                    </p>
+                    
                     {/* Preview de la imagen */}
-                    {(imagenPreview || (editingProduct && formData.imagen_url)) && (
+                    {formData.imagen_url && (
                       <div className="relative w-40 h-40 border-2 border-[#fbbf24]/30 rounded-lg overflow-hidden">
                         <img
-                          src={imagenPreview || formData.imagen_url}
+                          src={formData.imagen_url}
                           alt="Preview"
                           className="w-full h-full object-cover"
+                          onError={(e) => {
+                            (e.target as HTMLImageElement).src = 'https://via.placeholder.com/160?text=URL+Inválida';
+                          }}
                         />
-                        {imagenPreview && (
-                          <button
-                            type="button"
-                            onClick={() => {
-                              setImagenFile(null);
-                              setImagenPreview('');
-                            }}
-                            className="absolute top-2 right-2 bg-red-500 text-white p-1 rounded-full hover:bg-red-600"
-                          >
-                            <X className="w-4 h-4" />
-                          </button>
-                        )}
                       </div>
                     )}
-                    
-                    <p className="text-xs text-gray-400">
-                      Formatos permitidos: JPG, PNG, GIF, WEBP • Tamaño máximo: 5MB
-                    </p>
                   </div>
                 </div>
 
