@@ -1,51 +1,18 @@
 // API de compras
-// Acá se registran las compras, se valida el stock y se suben los comprobantes
+// Acá se registran las compras, se valida el stock y se guarda la URL del comprobante
 
 const express = require('express');
 const router = express.Router();
 const pool = require('../db/connection');
-const multer = require('multer');
-const path = require('path');
 const { verificarAutenticacion, verificarPermiso } = require('../middleware/auth');
-
-// Configuración de multer para subir comprobantes
-const storage = multer.diskStorage({
-  destination: function (req, file, cb) {
-    cb(null, 'public/uploads/'); // Los archivos se guardan acá
-  },
-  filename: function (req, file, cb) {
-    // Generamos un nombre único para el archivo
-    const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
-    cb(null, 'comprobante-' + uniqueSuffix + path.extname(file.originalname));
-  }
-});
-
-// Filtro para aceptar solo imágenes
-const fileFilter = (req, file, cb) => {
-  const tiposPermitidos = /jpeg|jpg|png|pdf/;
-  const extname = tiposPermitidos.test(path.extname(file.originalname).toLowerCase());
-  const mimetype = tiposPermitidos.test(file.mimetype);
-
-  if (extname && mimetype) {
-    return cb(null, true);
-  } else {
-    cb(new Error('Solo se permiten archivos de imagen (JPG, PNG) o PDF'));
-  }
-};
-
-const upload = multer({
-  storage: storage,
-  fileFilter: fileFilter,
-  limits: { fileSize: 5 * 1024 * 1024 } // Máximo 5MB
-});
 
 // 🛒 POST /api/compras - Crear una nueva compra
 // Esta ruta es pública, cualquier comprador puede usarla
-router.post('/', upload.single('comprobante'), async (req, res) => {
+router.post('/', async (req, res) => {
   const client = await pool.connect(); // Usamos una transacción
 
   try {
-    const { comprador_nombre, comprador_telefono, comprador_mesa, metodo_pago, productos, detalles_pedido } = req.body;
+    const { comprador_nombre, comprador_telefono, comprador_mesa, metodo_pago, productos, detalles_pedido, comprobante_url } = req.body;
 
     // Validamos los datos obligatorios
     if (!comprador_nombre || !comprador_mesa || !metodo_pago) {
@@ -71,11 +38,11 @@ router.post('/', upload.single('comprobante'), async (req, res) => {
       });
     }
 
-    // Si es transferencia, debe haber comprobante
-    if (metodo_pago === 'transferencia' && !req.file) {
+    // Si es transferencia, debe haber URL del comprobante
+    if (metodo_pago === 'transferencia' && !comprobante_url) {
       return res.status(400).json({
         success: false,
-        mensaje: 'Para transferencia es obligatorio subir el comprobante'
+        mensaje: 'Para transferencia es obligatorio proporcionar la URL del comprobante'
       });
     }
 
@@ -137,7 +104,7 @@ router.post('/', upload.single('comprobante'), async (req, res) => {
     }
 
     // 3️⃣ Registramos la compra
-    const comprobante_archivo = req.file ? `/uploads/${req.file.filename}` : null;
+    const comprobante_archivo = comprobante_url || null;
 
     const compra = await client.query(
       `INSERT INTO compras (comprador_nombre, comprador_telefono, comprador_mesa, metodo_pago, comprobante_archivo, total, detalles_pedido)
